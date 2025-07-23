@@ -1,3 +1,4 @@
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,100..1000;1,9..40,100..1000&display=swap');
 @import "tailwindcss";
 @import "tw-animate-css";
 
@@ -116,5 +117,16 @@
   }
   body {
     @apply bg-background text-foreground;
+
+    font-family: var(--font-dm-sans);
   }
+}
+
+@theme {
+  --font-dm-sans: "DM Sans", sans-serif;
+  
+  --color-light-grey: #595959;
+  --color-yellow: #F9D02C;
+  --color-btn-lightGray: #E9E9E9;
+  --color-dark: #0D0D0D;
 }
