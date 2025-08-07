@@ -1,9 +1,7 @@
-
-import MailIcon from "@/components/icons/MailIcon";
+import MailIcon from "@/assets/icons/components/MailIcon";
 import googleIcon from "../assets/icons/google.svg";
-import KeyIcon from "@/components/icons/KeyIcon";
+import KeyIcon from "@/assets/icons/components/KeyIcon";
 import eyeIcon from "../assets/icons/eye.svg";
-
 import Button from "@/components/buttons/Button";
 import Input from "@/components/Input";
 import RedirectToPage from "@/components/RedirectToPage";

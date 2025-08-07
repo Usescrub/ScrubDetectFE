@@ -4,7 +4,6 @@ import SunIcon from "../assets/icons/sun.svg";
 
 export default function ThemeSwitcher() {
   const [isDark, setIsDark] = useState(() => {
-    if (typeof window === "undefined") return false; 
     const savedTheme = localStorage.getItem("theme");
     return savedTheme
       ? savedTheme === "dark"
@@ -18,7 +17,6 @@ export default function ThemeSwitcher() {
 
   function handleThemeSwitcher() {
     setIsDark((prev) => !prev);
-    document.documentElement.classList.toggle("dark");
   }
   return (
     <button

@@ -1,8 +1,7 @@
 import Input from "@/components/Input";
-import userIcon from "@/components/icons/User";
-import MailIcon from "@/components/icons/MailIcon";
-import PhoneInputCustom from "@/components/PhoneInputCustom";
-import PhoneIcon from "@/components/icons/PhoneIcon";
+import userIcon from "@/assets/icons/components/User";
+import MailIcon from "@/assets/icons/components/MailIcon";
+import PhoneIcon from "@/assets/icons/components/PhoneIcon";
 import Button from "@/components/buttons/Button";
 
 export default function JoinUs() {
@@ -36,11 +35,12 @@ export default function JoinUs() {
           icon={MailIcon}
           classname="w-full"
         />
-        <PhoneInputCustom
+        <Input
           type="tel"
           placeholder="Enter your phone number"
           icon={PhoneIcon}
-          classname="w-full"
+          phone
+          classname="w-full overflow-visible z-50"
         />
         <div className="controls flex justify-between items-center w-full">
           <Button className="bg-btn-lightGray dark:bg-[#232323]" path="/login">

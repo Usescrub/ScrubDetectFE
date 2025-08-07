@@ -1,6 +1,6 @@
 import Input from "@/components/Input";
-import eyeIcon from "../assets/icons/eye.svg";
-import keyIcon from "@/components/icons/KeyIcon";
+import eyeIcon from "@/assets/icons/eye.svg";
+import keyIcon from "@/assets/icons/components/KeyIcon";
 import Button from "@/components/buttons/Button";
 
 type PasswordProps = {

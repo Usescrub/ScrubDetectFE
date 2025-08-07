@@ -1,11 +1,11 @@
 import Input from "@/components/Input";
 import Select from "@/components/Select";
 import Button from "@/components/buttons/Button";
-import CompanyIcon from "@/components/icons/CompanyIcon";
-import FlagIcon from "@/components/icons/FlagIcon";
-import GroupIcon from "@/components/icons/GroupIcon";
-import IndustryIcon from "@/components/icons/IndustryIcon";
-import RoleIcon from "@/components/icons/RoleIcon";
+import CompanyIcon from "@/assets/icons/components/CompanyIcon";
+import FlagIcon from "@/assets/icons/components/FlagIcon";
+import GroupIcon from "@/assets/icons/components/GroupIcon";
+import IndustryIcon from "@/assets/icons/components/IndustryIcon";
+import RoleIcon from "@/assets/icons/components/RoleIcon";
 export default function Details() {
   return (
     <div className="max-w-[508px] w-full h-[425px]">

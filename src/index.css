@@ -123,10 +123,28 @@
 }
 
 @theme {
+  /* fonts */
   --font-dm-sans: "DM Sans", sans-serif;
   
+  /* colors */
   --color-light-grey: #595959;
   --color-yellow: #F9D02C;
   --color-btn-lightGray: #E9E9E9;
   --color-dark: #0D0D0D;
+  
+}
+
+/*  phoneinput css styles */
+.input-phone-number input:focus{
+  outline: none !important;
+  border:none !important;
+  box-shadow: none !important;
+}
+
+.PhoneInput input::placeholder {
+  color: var(--color-light-grey)
+}
+
+.my-phone-input-container .PhoneInputInput {
+  margin-left: 10px; /* Adjust as needed */
 }

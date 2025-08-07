@@ -1,8 +1,8 @@
 import WhatToDo from "@/components/WhatToDo";
-import Usertag from "../../assets/icons/user-tag.svg";
-import MobileTag from "../../assets/icons/mobile.svg";
-import WarningTag from "../../assets/icons/warning-2.svg";
-import TickTag from "../../assets/icons/tick-circle.svg";
+import Usertag from "@/assets/icons/user-tag.svg";
+import MobileTag from "@/assets/icons/mobile.svg";
+import WarningTag from "@/assets/icons/warning-2.svg";
+import TickTag from "@/assets/icons/tick-circle.svg";
 import Button from "@/components/buttons/Button";
 
 export default function Verification() {
@@ -16,7 +16,7 @@ export default function Verification() {
           Welcome onboard, click on the verification link sent to your email at
           <span className="text-light-grey font-medium">
             {" "}example@workmail.com
-          </span>{" "}
+          </span>
           to verify your account.
         </p>
       </div>

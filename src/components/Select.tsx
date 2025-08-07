@@ -1,4 +1,4 @@
-import ArrowDown from "./icons/ArrowDown";
+import ArrowDown from "@/assets/icons/components/ArrowDown";
 
 type SelectProps = {
   icon: React.FC<React.SVGProps<SVGSVGElement>>;
@@ -22,14 +22,14 @@ export default function Select({
       <select
         name="country"
         id="country"
-        className="text-light-grey appearance-none"
+        className="text-light-grey appearance-none w-full bg-transparent outline-none pr-8"
       >
         <option value="" disabled selected>
           {placeholder}
         </option>
       </select>
 
-      <ArrowDown classname="absolute right-5" />
+      <ArrowDown classname="absolute right-5 pointer-events-none" />
     </div>
   );
 }

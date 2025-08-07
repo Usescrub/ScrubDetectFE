@@ -1,8 +1,7 @@
 import Input from "@/components/Input";
-
 import Button from "@/components/buttons/Button";
 import RedirectToPage from "@/components/RedirectToPage";
-import MailIcon from "@/components/icons/MailIcon";
+import MailIcon from "@/assets/icons/components/MailIcon";
 
 export default function ForgotPassword() {
   return (
