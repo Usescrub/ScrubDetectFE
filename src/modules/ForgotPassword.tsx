@@ -1,9 +1,38 @@
-import Input from "@/components/Input";
-import Button from "@/components/buttons/Button";
-import RedirectToPage from "@/components/RedirectToPage";
-import MailIcon from "@/assets/icons/components/MailIcon";
+import { z } from 'zod'
+import { zodResolver } from '@hookform/resolvers/zod'
+import { useForm } from 'react-hook-form'
+
+import Input from '@/components/Input'
+import Button from '@/components/buttons/Button'
+import PromptLink from '@/components/PromptLink'
+
+import MailIcon from '@/assets/icons/components/MailIcon'
+
+const formSchema = z
+  .object({
+    email: z.email(),
+  })
+  .required()
+
+type ForgetPasswordFormType = z.infer<typeof formSchema>
 
 export default function ForgotPassword() {
+  const {
+    control,
+    handleSubmit,
+    formState: { errors },
+  } = useForm<ForgetPasswordFormType>({
+    mode: 'onSubmit',
+    resolver: zodResolver(formSchema),
+    defaultValues: {
+      email: '',
+    },
+  })
+
+  const onSubmit = (data: ForgetPasswordFormType) => {
+    console.log(data)
+  }
+
   return (
     <>
       <div className="max-w-[508px] h-[405px]">
@@ -17,25 +46,26 @@ export default function ForgotPassword() {
         <form className="mb-5">
           <Input
             type="email"
+            name="email"
             placeholder="Enter your email"
             icon={MailIcon}
-            classname="w-full mb-5"
+            control={control}
+            error={errors.email?.message}
           />
           <div className="controls flex justify-between items-center">
             <Button className="bg-btn-lightGray dark:bg-[#232323]" path="../">
               Go Back
             </Button>
-            <Button className="bg-yellow dark:text-black" path="">
+            <Button
+              className="bg-yellow dark:text-black"
+              onClick={handleSubmit(onSubmit)}
+            >
               Send Reset Link
             </Button>
           </div>
         </form>
-        <RedirectToPage
-          prompt="New to Scrub.io?"
-          action="Sign Up"
-          path="/signup"
-        />
+        <PromptLink prompt="New to Scrub.io?" action="Sign Up" path="/signup" />
       </div>
     </>
-  );
+  )
 }

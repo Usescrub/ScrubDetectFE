@@ -1,9 +1,9 @@
-import WhatToDo from "@/components/WhatToDo";
-import Usertag from "@/assets/icons/user-tag.svg";
-import MobileTag from "@/assets/icons/mobile.svg";
-import WarningTag from "@/assets/icons/warning-2.svg";
-import TickTag from "@/assets/icons/tick-circle.svg";
-import Button from "@/components/buttons/Button";
+import Button from '@/components/buttons/Button'
+
+import Usertag from '@/assets/icons/user-tag.svg?react'
+import MobileTag from '@/assets/icons/mobile.svg?react'
+import WarningTag from '@/assets/icons/warning-2.svg?react'
+import TickTag from '@/assets/icons/tick-circle.svg?react'
 
 export default function Verification() {
   return (
@@ -15,7 +15,7 @@ export default function Verification() {
         <p className="text-light-grey font-normal">
           Welcome onboard, click on the verification link sent to your email at
           <span className="text-light-grey font-medium">
-            {" "}example@workmail.com
+            &nbsp; example@workmail.com
           </span>
           to verify your account.
         </p>
@@ -27,26 +27,22 @@ export default function Verification() {
               What do you have to do after your Account Activation?
             </h3>
             <div className="flex flex-col gap-4">
-              <WhatToDo
-                prompt="Tell us more about you"
-                src={Usertag}
-                alt="user-tag"
-              />
-              <WhatToDo
-                prompt="Authenticate your phone number"
-                src={MobileTag}
-                alt="mobile-tag"
-              ></WhatToDo>
-              <WhatToDo
-                prompt="Explore your dashboard in test mode"
-                src={WarningTag}
-                alt="warning-tag"
-              ></WhatToDo>
-              <WhatToDo
-                prompt="Go live on your dashboard with your compliance details"
-                src={TickTag}
-                alt="tick-tag"
-              ></WhatToDo>
+              <div className="flex gap-2 items-center">
+                <Usertag />
+                <p>Tell us more about you</p>
+              </div>
+              <div className="flex gap-2 items-center">
+                <MobileTag />
+                <p>Authenticate your phone number</p>
+              </div>
+              <div className="flex gap-2 items-center">
+                <WarningTag />
+                <p>Explore your dashboard in test mode</p>
+              </div>
+              <div className="flex gap-2 items-center">
+                <TickTag />
+                <p>Go live on your dashboard with your compliance details</p>
+              </div>
             </div>
           </div>
           <div className="controls flex justify-between items-center w-full">
@@ -63,5 +59,5 @@ export default function Verification() {
         </div>
       </div>
     </div>
-  );
+  )
 }
