@@ -1,4 +1,4 @@
-import { useNavigate } from 'react-router'
+import { useNavigate } from 'react-router-dom'
 import { useForm } from 'react-hook-form'
 import { z } from 'zod'
 import { zodResolver } from '@hookform/resolvers/zod'
@@ -20,9 +20,7 @@ const formSchema = z
       .min(1, 'Phone number is required'),
     email: z.email('Invalid email address'),
   })
-  .required({
-    firstName: true,
-  })
+  .required()
 type JoinUsFormType = z.infer<typeof formSchema>
 
 export default function JoinUs() {

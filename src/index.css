@@ -1,6 +1,6 @@
 @import url('https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,100..1000;1,9..40,100..1000&display=swap');
-@import "tailwindcss";
-@import "tw-animate-css";
+@import 'tailwindcss';
+@import 'tw-animate-css';
 
 @custom-variant dark (&:is(.dark *));
 
@@ -124,27 +124,31 @@
 
 @theme {
   /* fonts */
-  --font-dm-sans: "DM Sans", sans-serif;
-  
+  --font-dm-sans: 'DM Sans', sans-serif;
+
   /* colors */
   --color-light-grey: #595959;
-  --color-yellow: #F9D02C;
-  --color-btn-lightGray: #E9E9E9;
-  --color-dark: #0D0D0D;
-  
+  --color-yellow: #f9d02c;
+  --color-btn-lightGray: #e9e9e9;
+  --color-dark: #0d0d0d;
 }
 
 /*  phoneinput css styles */
-.input-phone-number input:focus{
+.input-phone-number input:focus {
   outline: none !important;
-  border:none !important;
+  border: none !important;
   box-shadow: none !important;
 }
 
 .PhoneInput input::placeholder {
-  color: var(--color-light-grey)
+  color: var(--color-light-grey);
 }
 
 .my-phone-input-container .PhoneInputInput {
   margin-left: 10px; /* Adjust as needed */
+}
+
+svg {
+  width: unset;
+  height: unset;
 }

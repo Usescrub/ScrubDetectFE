@@ -17,13 +17,13 @@ export default function Verification() {
           <span className="text-light-grey font-medium">
             &nbsp; example@workmail.com
           </span>
-          to verify your account.
+          &nbsp; to verify your account.
         </p>
       </div>
       <div>
         <div className="w-full flex flex-col justify-center items-center gap-5">
           <div className="w-full px-5 py-[1.5625rem] bg-[#F9F9FB] dark:bg-[#121212] rounded-[20px] flex flex-col gap-8">
-            <h3 className="font-medium leading-4.5 text-[#4C4C4C] dark:text-[]">
+            <h3 className="font-medium leading-4.5 text-[#4C4C4C] dark:text-white">
               What do you have to do after your Account Activation?
             </h3>
             <div className="flex flex-col gap-4">
@@ -52,7 +52,10 @@ export default function Verification() {
             >
               Go Back
             </Button>
-            <Button className="bg-yellow dark:text-black" path="">
+            <Button
+              className="bg-yellow dark:text-black"
+              path="/signup/create-password"
+            >
               Proceed
             </Button>
           </div>

@@ -15,7 +15,7 @@ export default function Button({
 }: ButtonProps) {
   const CompButton = (
     <button
-      className={`${className} flex justify-center items-center rounded-full w-[245px] h-[49px] py-3.5 px-8 cursor-pointer`}
+      className={`flex justify-center items-center rounded-full w-full h-[49px] py-3.5 px-8 cursor-pointer ${className} `}
       {...props}
     >
       {children}

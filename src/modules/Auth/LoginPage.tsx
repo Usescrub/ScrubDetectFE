@@ -1,6 +1,7 @@
 import { useForm } from 'react-hook-form'
 import { z } from 'zod'
 import { zodResolver } from '@hookform/resolvers/zod'
+import { useNavigate } from 'react-router-dom'
 
 import Input from '@/components/Input'
 import PromptLink from '@/components/PromptLink'
@@ -9,7 +10,6 @@ import MailIcon from '@/assets/icons/components/MailIcon'
 import googleIcon from '@/assets/icons/google.svg'
 import KeyIcon from '@/assets/icons/components/KeyIcon'
 import Button from '@/components/buttons/Button'
-import { useNavigate } from 'react-router'
 
 const formSchema = z
   .object({

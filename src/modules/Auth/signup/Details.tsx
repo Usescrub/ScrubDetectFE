@@ -76,7 +76,7 @@ export default function Details() {
           error={errors.country?.message}
         />
         <Select
-          name="Industry"
+          name="industry"
           options={[]}
           placeholder="Select your industry"
           icon={IndustryIcon}
