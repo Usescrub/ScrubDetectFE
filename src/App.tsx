@@ -3,12 +3,13 @@ import { createBrowserRouter, Navigate, RouterProvider } from 'react-router-dom'
 import UnauthenticatedLayout from './layouts/UnauthenticatedLayout'
 import PrivateRoute from './components/PrivateRoute'
 import AuthenticatedLayout from './layouts/AuthenticatedLayout'
-import LoginPage from './modules/LoginPage'
-import ForgotPassword from './modules/ForgotPassword'
-import Password from './modules/Password'
-import JoinUs from './modules/signup/JoinUs'
-import Details from './modules/signup/Details'
-import Verification from './modules/signup/Verification'
+import LoginPage from './modules/Auth/LoginPage'
+import ForgotPassword from './modules/Auth/ForgotPassword'
+import Password from './modules/Auth/Password'
+import JoinUs from './modules/Auth/signup/JoinUs'
+import Details from './modules/Auth/signup/Details'
+import Verification from './modules/Auth/signup/Verification'
+import Dashboard from './modules/Dashboard'
 
 const router = createBrowserRouter([
   {
@@ -50,6 +51,7 @@ const router = createBrowserRouter([
         <AuthenticatedLayout />
       </PrivateRoute>
     ),
+    children: [{ path: 'dashboard', element: <Dashboard /> }],
   },
 ])
 
