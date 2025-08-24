@@ -10,6 +10,7 @@ import JoinUs from './modules/Auth/signup/JoinUs'
 import Details from './modules/Auth/signup/Details'
 import Verification from './modules/Auth/signup/Verification'
 import Dashboard from './modules/Dashboard'
+import Contact from './modules/Contact/Contact'
 
 const router = createBrowserRouter([
   {
@@ -42,6 +43,7 @@ const router = createBrowserRouter([
           },
         ],
       },
+      {path: '/contact', element: <Contact/>}
     ],
   },
   {
