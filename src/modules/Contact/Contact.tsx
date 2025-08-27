@@ -34,6 +34,7 @@ export default function JoinUs() {
 
   const onSubmit = (data: ContactUsFormType) => {
     console.log(data)
+    window.location.href = 'https://calendly.com/pajayi-usescrub/30min'
   }
 
   return (
