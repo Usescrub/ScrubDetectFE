@@ -1,66 +1,114 @@
+import { useEffect, useState } from 'react'
+import { useNavigate } from 'react-router-dom'
+import { toast } from 'sonner'
+import { authService } from '@/services/authService'
+import { useAppSelector } from '@/redux/hooks'
 import Button from '@/components/buttons/Button'
 
 import Usertag from '@/assets/icons/user-tag.svg?react'
 import MobileTag from '@/assets/icons/mobile.svg?react'
 import WarningTag from '@/assets/icons/warning-2.svg?react'
 import TickTag from '@/assets/icons/tick-circle.svg?react'
+import UnauthenticatedLayout from '@/layouts/UnauthenticatedLayout'
 
 export default function Verification() {
+  const navigate = useNavigate()
+  const { signupData } = useAppSelector((state) => state.auth)
+  const [email, setEmail] = useState<string>('')
+  const [isResending, setIsResending] = useState(false)
+
+  useEffect(() => {
+    if (!signupData.email) {
+      navigate('/signup/join-us')
+      return
+    }
+    setEmail(signupData.email)
+  }, [navigate, signupData])
+
+  const handleResendVerification = async () => {
+    if (!email) return
+
+    setIsResending(true)
+    try {
+      await authService.resendVerification(email)
+      toast.success('Verification email sent successfully')
+    } catch (error) {
+      const errorMessage =
+        typeof error === 'string'
+          ? error
+          : (error as { response?: { data?: { message?: string } } })?.response
+              ?.data?.message ||
+            'Failed to resend verification email. Please try again.'
+      toast.error(errorMessage)
+    } finally {
+      setIsResending(false)
+    }
+  }
   return (
-    <div className="max-w-[508px] w-full h-[425px]">
-      <div className="mb-7 text">
-        <h2 className="font-semibold text-[2rem] mb-2">
-          Verification Link Sent!
-        </h2>
-        <p className="text-light-grey font-normal">
-          Welcome onboard, click on the verification link sent to your email at
-          <span className="text-light-grey font-medium">
-            &nbsp; example@workmail.com
-          </span>
-          &nbsp; to verify your account.
-        </p>
-      </div>
-      <div>
-        <div className="w-full flex flex-col justify-center items-center gap-5">
-          <div className="w-full px-5 py-[1.5625rem] bg-[#F9F9FB] dark:bg-[#121212] rounded-[20px] flex flex-col gap-8">
-            <h3 className="font-medium leading-4.5 text-[#4C4C4C] dark:text-white">
-              What do you have to do after your Account Activation?
-            </h3>
-            <div className="flex flex-col gap-4">
-              <div className="flex gap-2 items-center">
-                <Usertag />
-                <p>Tell us more about you</p>
+    <UnauthenticatedLayout>
+      <div className="max-w-[508px] w-full h-[425px]">
+        <div className="mb-7 text">
+          <h2 className="font-semibold text-[2rem] mb-2">
+            Verification Link Sent!
+          </h2>
+          <p className="text-light-grey font-normal">
+            Welcome onboard, click on the verification link sent to your email
+            at
+            <span className="text-light-grey font-medium">&nbsp; {email}</span>
+            &nbsp; to verify your account.
+          </p>
+        </div>
+        <div>
+          <div className="w-full flex flex-col justify-center items-center gap-5">
+            <div className="w-full px-5 py-[1.5625rem] bg-[#F9F9FB] dark:bg-[#121212] rounded-[20px] flex flex-col gap-8">
+              <h3 className="font-medium leading-4.5 text-[#4C4C4C] dark:text-white">
+                What do you have to do after your Account Activation?
+              </h3>
+              <div className="flex flex-col gap-4">
+                <div className="flex gap-2 items-center">
+                  <Usertag />
+                  <p>Tell us more about you</p>
+                </div>
+                <div className="flex gap-2 items-center">
+                  <MobileTag />
+                  <p>Authenticate your phone number</p>
+                </div>
+                <div className="flex gap-2 items-center">
+                  <WarningTag />
+                  <p>Explore your dashboard in test mode</p>
+                </div>
+                <div className="flex gap-2 items-center">
+                  <TickTag />
+                  <p>Go live on your dashboard with your compliance details</p>
+                </div>
               </div>
-              <div className="flex gap-2 items-center">
-                <MobileTag />
-                <p>Authenticate your phone number</p>
-              </div>
-              <div className="flex gap-2 items-center">
-                <WarningTag />
-                <p>Explore your dashboard in test mode</p>
-              </div>
-              <div className="flex gap-2 items-center">
-                <TickTag />
-                <p>Go live on your dashboard with your compliance details</p>
+            </div>
+            <div className="controls flex flex-col gap-3 w-full">
+              <Button
+                className="bg-transparent text-yellow text-sm w-full"
+                onClick={handleResendVerification}
+                disabled={isResending}
+              >
+                {isResending ? 'Sending...' : 'Resend Verification Email'}
+              </Button>
+              <div className="flex justify-between items-center w-full gap-x-2.5">
+                <Button
+                  className="bg-btn-lightGray dark:bg-[#232323]"
+                  onClick={() => navigate('/signup/details')}
+                >
+                  Go Back
+                </Button>
+                <Button
+                  className="bg-yellow dark:text-black"
+                  onClick={() => navigate('/signup/create-password')}
+                >
+                  Proceed
+                </Button>
               </div>
             </div>
           </div>
-          <div className="controls flex justify-between items-center w-full">
-            <Button
-              className="bg-btn-lightGray dark:bg-[#232323]"
-              path="/signup/details"
-            >
-              Go Back
-            </Button>
-            <Button
-              className="bg-yellow dark:text-black"
-              path="/signup/create-password"
-            >
-              Proceed
-            </Button>
-          </div>
         </div>
       </div>
-    </div>
+    </UnauthenticatedLayout>
   )
 }

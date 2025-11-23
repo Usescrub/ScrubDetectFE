@@ -9,12 +9,19 @@ import {
 
 import { flexRender, useReactTable } from '@tanstack/react-table'
 import useTable from './useTable'
-interface AppTableProps {
-  data: Record<string, string | number | undefined | boolean>[]
+interface AppTableProps<
+  T extends Record<string, string | number | undefined | boolean>
+> {
+  data: T[]
   columns: any
 }
 
-const AppTable = ({ data, columns }: AppTableProps) => {
+const AppTable = <
+  T extends Record<string, string | number | undefined | boolean>
+>({
+  data,
+  columns,
+}: AppTableProps<T>) => {
   const tableState = useTable()
   const table = useReactTable({
     data,

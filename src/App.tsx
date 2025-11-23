@@ -1,6 +1,6 @@
 import { createBrowserRouter, Navigate, RouterProvider } from 'react-router-dom'
 
-import UnauthenticatedLayout from './layouts/UnauthenticatedLayout'
+import { Toaster } from '@/components/ui/sonner'
 import PrivateRoute from './components/PrivateRoute'
 import AuthenticatedLayout from './layouts/AuthenticatedLayout'
 import LoginPage from './modules/Auth/LoginPage'
@@ -10,11 +10,14 @@ import JoinUs from './modules/Auth/signup/JoinUs'
 import Details from './modules/Auth/signup/Details'
 import Verification from './modules/Auth/signup/Verification'
 import Dashboard from './modules/Dashboard'
+import Scan from './modules/Dashboard/Scan'
+import TokenManagement from './modules/Dashboard/TokenManagement'
+import { PublicRoute } from './components/PublicRoutes'
 
 const router = createBrowserRouter([
   {
     path: '/',
-    element: <UnauthenticatedLayout />,
+    element: <PublicRoute />,
     children: [
       {
         index: true,
@@ -51,12 +54,21 @@ const router = createBrowserRouter([
         <AuthenticatedLayout />
       </PrivateRoute>
     ),
-    children: [{ path: 'dashboard', element: <Dashboard /> }],
+    children: [
+      { path: 'dashboard', element: <Dashboard /> },
+      { path: 'scan', element: <Scan /> },
+      { path: 'token-management', element: <TokenManagement /> },
+    ],
   },
 ])
 
 function App() {
-  return <RouterProvider router={router} />
+  return (
+    <>
+      <RouterProvider router={router} />
+      <Toaster />
+    </>
+  )
 }
 
 export default App

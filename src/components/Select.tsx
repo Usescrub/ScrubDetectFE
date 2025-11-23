@@ -10,36 +10,46 @@ type SelectProps = {
   classname?: string
   options: { label: string; value: string }[]
   name: string
-  control?: Control<any>
+  control: Control<any>
   error?: string
+  onChange?: (value: string) => void
+  iconClassName?: string
 }
 
 export default function Select({
   icon: Icon,
+  iconClassName,
   classname,
   placeholder,
   options,
   name,
   control,
   error,
+  onChange,
 }: SelectProps) {
   const { field } = useController({
-    name: name,
+    name,
     control,
   })
+
+  const handleChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    field.onChange(e.target.value)
+    onChange?.(e.target.value)
+  }
+
   return (
     <div className="mb-4 w-full relative">
       <div
         className={`relative w-full bg-[#F9F9FB] dark:bg-[#0D0D0D] flex rounded-full px-2.5 py-2 items-center gap-x-3 ${classname}`}
       >
-        <div className="rounded-full w-11 h-11 bg-[#E8E8E9] dark:bg-[#222224] flex items-center justify-center">
-          <Icon />
+        <div className="rounded-full w-11 h-11 bg-[#E8E8E9] dark:bg-[#222224] flex items-center justify-center py-2 px-2">
+          <Icon className={iconClassName} />
         </div>
 
         <select
           name={name}
           value={field.value}
-          onChange={field.onChange}
+          onChange={handleChange}
           className="text-light-grey appearance-none w-full bg-transparent outline-none pr-8"
         >
           <option value="" disabled>

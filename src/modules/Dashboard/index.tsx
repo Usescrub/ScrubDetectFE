@@ -1,4 +1,5 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { type ColumnDef } from '@tanstack/react-table'
 import { cn } from '@/lib/utils'
 
@@ -13,6 +14,7 @@ import {
   PopoverTrigger,
   PopoverClose,
 } from '@/components/ui/popover'
+import { useAppSelector, useAppDispatch } from '@/redux/hooks'
 
 import ArrowLeft from '@/assets/icons/arrow-left.svg?react'
 import File from '@/assets/icons/file.svg?react'
@@ -21,6 +23,8 @@ import Calendar from '@/assets/icons/calendar.svg?react'
 import Filter from '@/assets/icons/filter.svg?react'
 import Export from '@/assets/icons/export.svg?react'
 import Reload from '@/assets/icons/reload.svg?react'
+import { fetchAllScanResults } from '@/redux/slices/scanSlice'
+import type { ScanResult } from '@/services/scanService'
 
 type TableData = {
   id: string
@@ -36,50 +40,8 @@ const filterObject = {
   failed: 'bg-[#E31E18]',
   processing: 'bg-[#DF9300]',
 }
-const data: TableData[] = [
-  {
-    id: 'm5gr84i9',
-    date: 316,
-    status: 'completed',
-    fileName: 'ken99@example.com',
-    type: 'PDF',
-    result: 'Sensitive',
-  },
-  {
-    id: '3u1reuv4',
-    date: 242,
-    status: 'completed',
-    fileName: 'Abe45@example.com',
-    type: 'PDF',
-    result: 'Sensitive',
-  },
-  {
-    id: 'derv1ws0',
-    date: 837,
-    status: 'processing',
-    fileName: 'Monserrat44@example.com',
-    type: 'PDF',
-    result: 'Sensitive',
-  },
-  {
-    id: '5kma53ae',
-    date: 874,
-    status: 'completed',
-    fileName: 'Silas22@example.com',
-    type: 'PDF',
-    result: 'Sensitive',
-  },
-  {
-    id: 'bhqecj4p',
-    date: 721,
-    status: 'failed',
-    fileName: 'carmella@example.com',
-    type: 'PDF',
-    result: 'Sensitive',
-  },
-]
 
-const dashboardColumns: ColumnDef<TableData>[] = [
+const dashboardColumns: ColumnDef<ScanResult>[] = [
   {
     accessorKey: 'fileName',
     header: 'FILE NAME',
@@ -91,7 +53,7 @@ const dashboardColumns: ColumnDef<TableData>[] = [
     accessorKey: 'status',
     header: 'STATUS',
     cell: ({ row }) => {
-      const status = row.original.status
+      const status = row.original.scanStatus
       const classNames: Record<TableData['status'], string> = {
         completed: 'bg-[#EBFAF5] text-[#0CB95B]',
         failed: 'bg-[#FDEDED] text-[#E31E18]',
@@ -116,22 +78,35 @@ const dashboardColumns: ColumnDef<TableData>[] = [
     },
   },
   {
-    accessorKey: 'type',
+    accessorKey: 'fileType',
     header: 'TYPE',
     cell: ({ row }) => (
-      <div className="capitalize uppercase">{row.getValue('type')}</div>
+      <div className="capitalize uppercase">{row.original.fileType}</div>
+    ),
+  },
+  {
+    accessorKey: 'aiGeneratedScore',
+    header: 'SCORE',
+    cell: ({ row }) => (
+      <div className="capitalize uppercase">
+        {row.original.aiGeneratedScore * 100}%
+      </div>
     ),
   },
   {
     accessorKey: 'result',
     header: 'RESULT SUMMARY',
+    cell: ({ row }) => (
+      <div className="capitalize uppercase">
+        {row.original.aiGeneratedScore > 0.5
+          ? 'AI Generated'
+          : 'Human Generated'}
+      </div>
+    ),
   },
   {
-    accessorKey: 'date',
+    accessorKey: 'uploadDate',
     header: 'DATE',
-    cell: () => {
-      return <div className="">2025-06-13 10:14:59 AM</div>
-    },
   },
   {
     id: 'actions',
@@ -153,7 +128,14 @@ const dashboardColumns: ColumnDef<TableData>[] = [
 
 const Dashboard = () => {
   const [filter, setFilter] = useState<string[]>([])
-  console.log(filter)
+  const { scanHistory, isLoading } = useAppSelector((state) => state.scan)
+  const dispatch = useAppDispatch()
+  console.log(isLoading, scanHistory)
+  const navigate = useNavigate()
+
+  useEffect(() => {
+    dispatch(fetchAllScanResults())
+  }, [dispatch])
 
   const updateFilter = (obj?: string) => {
     if (!obj) {
@@ -180,7 +162,7 @@ const Dashboard = () => {
             <CardDescription>Scans Used This Month</CardDescription>
             <CardContent className="px-0">
               <div className="content">
-                <p className="font-bold text-3xl">12/50</p>
+                <p className="font-bold text-3xl">{scanHistory.length}/50</p>
               </div>
               <Progress value={50} className="w-full h-[23px] mt-8" />
             </CardContent>
@@ -205,15 +187,15 @@ const Dashboard = () => {
       <div className="table bg-white dark:bg-[#0D0D0D] dark:text-[#D7E4F1] text-[#0E1B28] rounded-2xl mt-9 px-6">
         <div className="actions flex justify-between w-full my-3 items-center">
           <div className="input w-full basis-[55%]">Search</div>
-          <div className=" flex gap-x-3 basis-[45%]">
-            <div className="rounded-full px-4 flex items-center justify-center h-11 cursor-pointer text-black dark:text-white gap-x-2 dark:bg-[#131313] dark:border-[#1C1C1C] bg-[#F7F7FA] border border-[#EBEBF5] w-full">
-              <Calendar />
+          <div className=" flex gap-x-3 basis-[45%] justify-end">
+            <div className="rounded-full px-4 flex items-center h-11 cursor-pointer text-black dark:text-white gap-x-2 dark:bg-[#131313] dark:border-[#1C1C1C] bg-[#F7F7FA] border border-[#EBEBF5] min-w-[120px]">
+              <Calendar className="w-[30px] h-[30px]" />
               <p className="text-[14px] dark:text-[#D7E4F1]">Any Date</p>
             </div>
 
             <Popover>
               <PopoverTrigger asChild>
-                <div className="rounded-full px-4 flex justify-center items-center h-11 cursor-pointer text-black dark:text-white gap-x-2 dark:bg-[#131313] dark:border-[#1C1C1C] bg-[#F7F7FA] border border-[#EBEBF5] w-full">
+                <div className="rounded-full px-4 flex items-center h-11 cursor-pointer text-black dark:text-white gap-x-2 dark:bg-[#131313] dark:border-[#1C1C1C] bg-[#F7F7FA] border border-[#EBEBF5] w-[110px]">
                   <Filter />
                   <p className="text-[14px] dark:text-[#D7E4F1]">Filter</p>
                 </div>
@@ -260,18 +242,21 @@ const Dashboard = () => {
               </PopoverContent>
             </Popover>
 
-            <div className="rounded-full px-4 flex items-center h-11 cursor-pointer text-black dark:text-white gap-x-2 dark:bg-[#131313] dark:border-[#1C1C1C] bg-[#F7F7FA] border border-[#EBEBF5] w-full">
+            <div className="rounded-full px-4 flex items-center h-11 cursor-pointer text-black dark:text-white gap-x-2 dark:bg-[#131313] dark:border-[#1C1C1C] bg-[#F7F7FA] border border-[#EBEBF5] w-fit">
               <Export />
               <p className="text-[14px] dark:text-[#D7E4F1]">Export CSV</p>
             </div>
 
-            <div className="rounded-full h-11 w-full flex items-center justify-center cursor-pointer dark:text-white text-black gap-x-2 [&&]:px-1 bg-[#FAD645]">
+            <div
+              onClick={() => navigate('/scan')}
+              className="rounded-full h-11 w-fit flex items-center justify-center cursor-pointer dark:text-white text-black gap-x-2 px-5 bg-[#FAD645]"
+            >
               <Plus />
               <p className="text-[14px] dark:text-black">New Scan</p>
             </div>
           </div>
         </div>
-        <AppTable data={data} columns={dashboardColumns} />
+        <AppTable data={scanHistory} columns={dashboardColumns} />
       </div>
     </div>
   )
