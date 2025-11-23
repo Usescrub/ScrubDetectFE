@@ -20,14 +20,14 @@ const ScanResults = () => {
   }
 
   const getStatusColor = (status: string) => {
-    if (status === 'valid' || status === 'not-detected') {
+    if (status === 'completed') {
       return 'bg-[#0CB95B]'
     }
     return 'bg-[#E31E18]'
   }
 
   const getStatusTextColor = (status: string) => {
-    if (status === 'valid' || status === 'not-detected') {
+    if (status === 'completed') {
       return 'bg-[#EBFAF5] text-[#0CB95B]'
     }
     return 'bg-[#FDEDED] text-[#E31E18]'
@@ -98,10 +98,10 @@ const ScanResults = () => {
                 <div
                   className={`${getScanStatusColor(
                     currentScan?.scanStatus
-                  )} items-center flex capitalize py-2 px-4 w-fit rounded-2xl`}
+                  )} items-center flex capitalize py-1 px-2 text-xs w-fit rounded-2xl`}
                 >
                   <div
-                    className={`rounded-full h-[8px] w-[8px] mr-3 ${getScanStatusDot(
+                    className={`rounded-full h-[8px] w-[8px] mr-1 ${getScanStatusDot(
                       currentScan?.scanStatus
                     )}`}
                   ></div>
@@ -146,10 +146,10 @@ const ScanResults = () => {
                   <div
                     className={`${getStatusTextColor(
                       currentScan?.scanStatus
-                    )} items-center flex capitalize py-2 px-4 w-fit rounded-2xl`}
+                    )} items-center flex capitalize py-1 px-2 text-xs w-fit rounded-2xl`}
                   >
                     <div
-                      className={`rounded-full h-[8px] w-[8px] mr-3 ${getStatusColor(
+                      className={`rounded-full h-[8px] w-[8px] mr-1 ${getStatusColor(
                         currentScan?.scanStatus
                       )}`}
                     ></div>
@@ -164,6 +164,16 @@ const ScanResults = () => {
                 {/* <div className="px-4 py-4 text-sm text-[#0E1B28] dark:text-[#D7E4F1]">
                   {currentScan?.documentValidity.resultSummary}
                 </div> */}
+              </div>
+              <div className="grid grid-cols-3 border-b border-[#E0E0E0] dark:border-[#333333]">
+                <div className="px-4 py-4 text-sm text-[#0E1B28] dark:text-[#D7E4F1]">
+                  Document Score
+                </div>
+                <div className="px-4 py-4">
+                  <div className="capitalize">
+                    {currentScan?.aiGeneratedScore * 100}%
+                  </div>
+                </div>
               </div>
 
               {/* Tampering Detected Row */}

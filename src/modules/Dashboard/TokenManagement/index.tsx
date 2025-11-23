@@ -4,7 +4,11 @@ import { z } from 'zod'
 import { toast } from 'sonner'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useAppDispatch, useAppSelector } from '@/redux/hooks'
-import { createToken, fetchTokens } from '@/redux/slices/tokenSlice'
+import {
+  createToken,
+  deleteToken,
+  fetchTokens,
+} from '@/redux/slices/tokenSlice'
 
 import { Card, CardContent } from '@/components/ui/card'
 import {
@@ -20,7 +24,6 @@ import Button from '@/components/buttons/Button'
 
 import Copy from '@/assets/icons/copy.svg?react'
 import KeyIcon from '@/assets/icons/components/KeyIcon'
-import TickCircle from '@/assets/icons/tick-circle.svg?react'
 
 const formSchema = z.object({
   name: z.string().min(1, 'Token name is required'),
@@ -32,9 +35,6 @@ const TokenManagement = () => {
   const dispatch = useAppDispatch()
   const { tokens, isLoading } = useAppSelector((state) => state.token)
   const [showCreateDialog, setShowCreateDialog] = useState(false)
-  const [newToken, setNewToken] = useState<string | null>(null)
-  const [showTokenDialog, setShowTokenDialog] = useState(false)
-  console.log(tokens, isLoading)
 
   const {
     control,
@@ -54,10 +54,12 @@ const TokenManagement = () => {
 
   const onSubmit = async (data: FormType) => {
     dispatch(createToken(data.name))
+    setShowCreateDialog(false)
+    reset()
   }
 
   const handleDelete = async (tokenId: string) => {
-    console.log(tokenId)
+    dispatch(deleteToken(tokenId))
   }
 
   const copyToClipboard = (text: string) => {
@@ -190,43 +192,6 @@ const TokenManagement = () => {
               </Button>
             </DialogFooter>
           </form>
-        </DialogContent>
-      </Dialog>
-
-      <Dialog open={showTokenDialog} onOpenChange={setShowTokenDialog}>
-        <DialogContent className="bg-white dark:bg-[#0D0D0D]">
-          <DialogHeader>
-            <DialogTitle className="text-[#0E1B28] dark:text-[#D7E4F1]">
-              Token Created Successfully
-            </DialogTitle>
-            <DialogDescription className="text-[#82898F] dark:text-[#9CA3AF]">
-              Copy your token now. You won't be able to see it again!
-            </DialogDescription>
-          </DialogHeader>
-          <div className="py-4">
-            <div className="p-4 bg-[#0D0D0D] dark:bg-[#1C1C1C] rounded-lg">
-              <code className="text-[#FAD645] font-mono text-sm break-all">
-                {newToken}
-              </code>
-            </div>
-          </div>
-          <DialogFooter>
-            <Button
-              className="bg-[#FAD645] dark:text-black hover:bg-[#FAD645]/90"
-              onClick={() => {
-                if (newToken) {
-                  copyToClipboard(newToken)
-                }
-                setShowTokenDialog(false)
-                setNewToken(null)
-              }}
-            >
-              <span className="flex items-center gap-2">
-                <TickCircle className="w-4 h-4" />
-                Copy Token
-              </span>
-            </Button>
-          </DialogFooter>
         </DialogContent>
       </Dialog>
     </div>

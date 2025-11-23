@@ -45,14 +45,14 @@ const Scan = () => {
     isScanning,
     error: scanError,
   } = useAppSelector((state) => state.scan)
-  const { user } = useAppSelector((state) => state.auth)
   const [selectedFile, setSelectedFile] = useState<File | null>(null)
   const [isDragging, setIsDragging] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
+  const { tokens } = useAppSelector((state) => state.token)
   const [fileType, setFileType] = useState<string>('.pdf')
 
-  const hasApiKey = !!user?.apiKey
+  const hasApiKey = !!tokens.length
 
   useEffect(() => {
     if (scanError) {

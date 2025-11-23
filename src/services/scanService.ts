@@ -1,3 +1,4 @@
+import type { AxiosRequestConfig } from 'axios'
 import apiClient from './api'
 import { API_ENDPOINTS } from './config'
 
@@ -10,7 +11,7 @@ export interface DetectionApiResponse {
   success: boolean
   cached: boolean
   detectionData: {
-    fileName: string
+    filename: string
     status: string
     request: {
       id: string
@@ -64,8 +65,8 @@ const transformDetectionResponse = (
 
   const result: ScanResult = {
     id: apiResponse.detectionData.request.id,
-    fileName: apiResponse.detectionData.fileName || 'Unknown',
-    fileType: (apiResponse.detectionData.fileName || 'Unknown.unknown')
+    fileName: apiResponse.detectionData.filename || 'Unknown',
+    fileType: (apiResponse.detectionData.filename || 'Unknown.unknown')
       .split('.')
       .pop(),
     uploadedBy: 'Current User',
@@ -98,7 +99,10 @@ const transformDetectionResponse = (
 }
 
 export const scanService = {
-  async scanDocument(file: File): Promise<ScanResponse> {
+  async scanDocument(
+    file: File,
+    config: AxiosRequestConfig
+  ): Promise<ScanResponse> {
     const formData = new FormData()
     formData.append('file', file)
 
@@ -106,14 +110,17 @@ export const scanService = {
       API_ENDPOINTS.DETECTION.DETECT_FILE,
       formData,
       {
+        ...config,
         headers: {
           'Content-Type': 'multipart/form-data',
+          ...config.headers,
         },
       }
     )
 
     const transformedData = transformDetectionResponse(response.data)
 
+    console.log(transformedData)
     return {
       success: response.data.success,
       data: transformedData,
@@ -126,6 +133,7 @@ export const scanService = {
     )
 
     const transformedData = transformDetectionResponse(response.data)
+    console.log(transformedData)
 
     return {
       success: response.data.success,
