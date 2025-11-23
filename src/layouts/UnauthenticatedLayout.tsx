@@ -1,4 +1,5 @@
-import { Outlet, useLocation } from 'react-router-dom'
+import React from 'react'
+import { useLocation } from 'react-router-dom'
 
 import ThemeSwitcher from '@/components/ThemeSwitcher'
 
@@ -23,7 +24,7 @@ const imageMap: Record<string, string> = {
   default: LoginImage,
 }
 
-export default function UnauthenticatedLayout() {
+const UnauthenticatedLayout = ({ children }: { children: React.ReactNode }) => {
   const { pathname } = useLocation()
   const image = imageMap[pathname] ?? imageMap['default']
 
@@ -35,7 +36,7 @@ export default function UnauthenticatedLayout() {
             <ScrubIcon />
           </div>
           <div className="flex ml-[55px] items-center mx-auto w-full">
-            <Outlet />
+            {children}
           </div>
           <div className="self-start">
             <ThemeSwitcher />
@@ -52,3 +53,5 @@ export default function UnauthenticatedLayout() {
     </div>
   )
 }
+
+export default UnauthenticatedLayout

@@ -152,3 +152,7 @@ svg {
   width: unset;
   height: unset;
 }
+
+* {
+  box-sizing: border-box;
+}
