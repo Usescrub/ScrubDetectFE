@@ -4,7 +4,7 @@ import { API_ENDPOINTS } from './config'
 export interface Token {
   id: string
   name: string
-  token: string
+  key: string
   createdAt: string
   lastUsedAt?: string
 }
@@ -15,13 +15,13 @@ export interface CreateTokenRequest {
 
 export interface CreateTokenResponse {
   success: boolean
-  data: Token
+  token: Token
   message?: string
 }
 
 export interface ListTokensResponse {
   success: boolean
-  data: Token[]
+  tokens: Token[]
   message?: string
 }
 

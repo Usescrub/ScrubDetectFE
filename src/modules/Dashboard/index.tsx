@@ -128,9 +128,8 @@ const dashboardColumns: ColumnDef<ScanResult>[] = [
 
 const Dashboard = () => {
   const [filter, setFilter] = useState<string[]>([])
-  const { scanHistory, isLoading } = useAppSelector((state) => state.scan)
+  const { scanHistory } = useAppSelector((state) => state.scan)
   const dispatch = useAppDispatch()
-  console.log(isLoading, scanHistory)
   const navigate = useNavigate()
 
   useEffect(() => {

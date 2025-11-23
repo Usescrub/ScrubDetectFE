@@ -21,8 +21,8 @@ export const API_ENDPOINTS = {
     GET_ALL_RESULTS: '/api/v1/detect/scans',
   },
   TOKENS: {
-    CREATE: '/api/v1/tokens',
-    LIST: '/api/v1/tokens',
-    DELETE: (id: string) => `/api/v1/tokens/${id}`,
+    CREATE: '/api/v1/auth/tokens',
+    LIST: '/api/v1/auth/tokens',
+    DELETE: (id: string) => `/api/v1/auth/tokens/${id}`,
   },
 } as const

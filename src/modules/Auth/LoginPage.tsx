@@ -2,7 +2,7 @@ import { useEffect } from 'react'
 import { useForm } from 'react-hook-form'
 import { z } from 'zod'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useSearchParams, useLocation } from 'react-router-dom'
 import { toast } from 'sonner'
 import { useAppDispatch, useAppSelector } from '@/redux/hooks'
 import { login } from '@/redux/slices/authSlice'
@@ -28,6 +28,8 @@ type FormType = z.infer<typeof formSchema>
 export default function LoginPage() {
   const navigate = useNavigate()
   const dispatch = useAppDispatch()
+  const location = useLocation()
+  const [searchParams] = useSearchParams()
   const { isAuthenticated } = useAppSelector((state) => state.auth)
   const {
     control,
@@ -44,9 +46,13 @@ export default function LoginPage() {
 
   useEffect(() => {
     if (isAuthenticated) {
-      navigate('/dashboard')
+      const rdrKey = searchParams.get('rdr')
+      const from = (location.state as { from?: { pathname?: string } })?.from
+        ?.pathname
+      const redirectPath = rdrKey || from || '/dashboard'
+      navigate(redirectPath, { replace: true })
     }
-  }, [isAuthenticated, navigate])
+  }, [isAuthenticated, navigate, searchParams, location])
 
   const onSubmit = async (data: FormType) => {
     try {

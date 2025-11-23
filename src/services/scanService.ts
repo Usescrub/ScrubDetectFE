@@ -139,7 +139,6 @@ export const scanService = {
     )
 
     const transformedData = response.data.scans.map(transformDetectionResponse)
-    console.log(transformedData)
 
     return {
       success: response.data.success,

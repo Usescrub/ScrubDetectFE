@@ -1,11 +1,10 @@
 import { useState, useEffect } from 'react'
 import { useForm } from 'react-hook-form'
 import { z } from 'zod'
-import { zodResolver } from '@hookform/resolvers/zod'
 import { toast } from 'sonner'
-import { tokenService, type Token } from '@/services/tokenService'
-import { useAppDispatch } from '@/redux/hooks'
-import { getCurrentUser } from '@/redux/slices/authSlice'
+import { zodResolver } from '@hookform/resolvers/zod'
+import { useAppDispatch, useAppSelector } from '@/redux/hooks'
+import { createToken, fetchTokens } from '@/redux/slices/tokenSlice'
 
 import { Card, CardContent } from '@/components/ui/card'
 import {
@@ -19,6 +18,7 @@ import {
 import Input from '@/components/Input'
 import Button from '@/components/buttons/Button'
 
+import Copy from '@/assets/icons/copy.svg?react'
 import KeyIcon from '@/assets/icons/components/KeyIcon'
 import TickCircle from '@/assets/icons/tick-circle.svg?react'
 
@@ -30,11 +30,11 @@ type FormType = z.infer<typeof formSchema>
 
 const TokenManagement = () => {
   const dispatch = useAppDispatch()
-  const [tokens, setTokens] = useState<Token[]>([])
-  const [isLoading, setIsLoading] = useState(false)
+  const { tokens, isLoading } = useAppSelector((state) => state.token)
   const [showCreateDialog, setShowCreateDialog] = useState(false)
   const [newToken, setNewToken] = useState<string | null>(null)
   const [showTokenDialog, setShowTokenDialog] = useState(false)
+  console.log(tokens, isLoading)
 
   const {
     control,
@@ -48,61 +48,16 @@ const TokenManagement = () => {
     },
   })
 
-  const fetchTokens = async () => {
-    setIsLoading(true)
-    try {
-      const response = await tokenService.listTokens()
-      setTokens(response.data)
-    } catch (error) {
-      const errorMessage =
-        typeof error === 'string'
-          ? error
-          : (error as { response?: { data?: { message?: string } } })?.response
-              ?.data?.message || 'Failed to fetch tokens'
-      toast.error(errorMessage)
-    } finally {
-      setIsLoading(false)
-    }
-  }
-
   useEffect(() => {
-    fetchTokens()
+    dispatch(fetchTokens())
   }, [])
 
   const onSubmit = async (data: FormType) => {
-    try {
-      const response = await tokenService.createToken(data)
-      setNewToken(response.data.token)
-      setShowCreateDialog(false)
-      setShowTokenDialog(true)
-      reset()
-      await fetchTokens()
-      await dispatch(getCurrentUser()).unwrap()
-      toast.success('Token created successfully')
-    } catch (error) {
-      const errorMessage =
-        typeof error === 'string'
-          ? error
-          : (error as { response?: { data?: { message?: string } } })?.response
-              ?.data?.message || 'Failed to create token'
-      toast.error(errorMessage)
-    }
+    dispatch(createToken(data.name))
   }
 
   const handleDelete = async (tokenId: string) => {
-    try {
-      await tokenService.deleteToken(tokenId)
-      toast.success('Token deleted successfully')
-      await fetchTokens()
-      await dispatch(getCurrentUser()).unwrap()
-    } catch (error) {
-      const errorMessage =
-        typeof error === 'string'
-          ? error
-          : (error as { response?: { data?: { message?: string } } })?.response
-              ?.data?.message || 'Failed to delete token'
-      toast.error(errorMessage)
-    }
+    console.log(tokenId)
   }
 
   const copyToClipboard = (text: string) => {
@@ -122,7 +77,7 @@ const TokenManagement = () => {
         >
           <span className="flex items-center gap-2 text-sm">
             <KeyIcon width={16} height={16} />
-            Create New Token
+            Create Token
           </span>
         </Button>
       </div>
@@ -165,18 +120,22 @@ const TokenManagement = () => {
                       </div>
                       <div className="mt-3 flex items-center gap-2">
                         <code className="px-3 py-1.5 bg-[#0D0D0D] dark:bg-[#1C1C1C] text-[#FAD645] rounded text-sm font-mono">
-                          {token.token.substring(0, 20)}...
+                          {token.key.substring(0, 20)}...
                         </code>
                         <Button
-                          className="bg-[#E9E9E9] dark:bg-[#232323] text-xs px-2 py-1 h-auto"
-                          onClick={() => copyToClipboard(token.token)}
+                          className="bg-[#E9E9E9] dark:bg-[#232323] text-xs py-1 [&&]:w-fit [&&]:text-sm [&&]:px-2 [&&]:h-[30px]"
+                          onClick={() => copyToClipboard(token.key)}
                         >
-                          Copy
+                          <Copy
+                            width={16}
+                            height={16}
+                            className="stroke-[#060402] dark:stroke-[#9CA3AF]"
+                          />
                         </Button>
                       </div>
                     </div>
                     <Button
-                      className="bg-[#FDEDED] dark:bg-[#2a1a1a] text-[#E31E18] hover:bg-[#FDEDED]/80 text-xs px-3 py-1 h-auto"
+                      className="bg-[#FDEDED] dark:bg-[#2a1a1a] text-[#E31E18] hover:bg-[#FDEDED]/80 text-xs py-1 [&&]:w-fit [&&]:text-sm [&&]:px-2 [&&]:h-[30px]"
                       onClick={() => handleDelete(token.id)}
                     >
                       Delete

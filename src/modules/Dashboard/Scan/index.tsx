@@ -8,20 +8,14 @@ import { useNavigate } from 'react-router-dom'
 import { useAppDispatch, useAppSelector } from '@/redux/hooks'
 import { scanDocument, clearError } from '@/redux/slices/scanSlice'
 import { Card, CardContent } from '@/components/ui/card'
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from '@/components/ui/dialog'
+
 import Select from '@/components/Select'
 import Button from '@/components/buttons/Button'
 
 import File from '@/assets/icons/file.svg?react'
 import Warning2 from '@/assets/icons/warning-2.svg?react'
 import TickCircle from '@/assets/icons/tick-circle.svg?react'
+import KeyIcon from '@/assets/icons/components/KeyIcon'
 
 import ScanResults from './ScanResults'
 
@@ -57,13 +51,8 @@ const Scan = () => {
   const [error, setError] = useState<string | null>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
   const [fileType, setFileType] = useState<string>('.pdf')
-  const [showApiKeyDialog, setShowApiKeyDialog] = useState(false)
 
-  useEffect(() => {
-    if (!user?.apiKey) {
-      setShowApiKeyDialog(true)
-    }
-  }, [user])
+  const hasApiKey = !!user?.apiKey
 
   useEffect(() => {
     if (scanError) {
@@ -191,6 +180,33 @@ const Scan = () => {
       <h2 className="text-2xl font-semibold mb-6 text-[#0E1B28] dark:text-[#D7E4F1]">
         Scan a Document
       </h2>
+
+      {!hasApiKey && (
+        <div className="mb-6 p-4 bg-[#FDEDED] dark:bg-[#2a1a1a] rounded-lg border border-[#E31E18]">
+          <div className="flex items-start gap-3">
+            <Warning2 className="w-5 h-5 text-[#E31E18] flex-shrink-0 mt-0.5" />
+            <div className="flex-1">
+              <p className="text-sm font-semibold text-[#E31E18] mb-1">
+                API Key Required
+              </p>
+              <p className="text-sm text-[#0E1B28] dark:text-[#D7E4F1] mb-3">
+                You need an API key to scan documents. Please create a token to
+                get your API key and enable scanning functionality.
+              </p>
+              <Button
+                className="bg-[#E31E18] hover:bg-[#E31E18]/90 text-white text-sm px-4 py-2 [&&]:w-fit [&&]:h-[30px]"
+                onClick={() => navigate('/token-management')}
+              >
+                <span className="flex items-center gap-2">
+                  <KeyIcon />
+                  Get Token
+                </span>
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
+
       <Card className="w-full bg-white dark:bg-[#0D0D0D]">
         <CardContent className="px-2 py-2">
           <div className="card-content border rounded-2xl border-[#E0E0E0] dark:border-[#333333] p-6 mb-6">
@@ -309,7 +325,7 @@ const Scan = () => {
             <Button
               className="bg-[#FAD645] dark:text-black hover:bg-[#FAD645]/90 [&&]:w-fit [&&}:text-sm [&&]:px-2 [&&]:h-[24px]"
               onClick={handleSubmit(onSubmit)}
-              disabled={isScanning || !selectedFile}
+              disabled={isScanning || !selectedFile || !hasApiKey}
             >
               <span className="flex items-center text-sm gap-2">
                 <TickCircle className="w-5 h-5" />
@@ -319,31 +335,6 @@ const Scan = () => {
           </div>
         </CardContent>
       </Card>
-
-      <Dialog open={showApiKeyDialog} onOpenChange={setShowApiKeyDialog}>
-        <DialogContent className="bg-white dark:bg-[#0D0D0D]">
-          <DialogHeader>
-            <DialogTitle className="text-[#0E1B28] dark:text-[#D7E4F1]">
-              API Key Required
-            </DialogTitle>
-            <DialogDescription className="text-[#82898F] dark:text-[#9CA3AF]">
-              You need an API key to scan documents. Please create a token to
-              get your API key.
-            </DialogDescription>
-          </DialogHeader>
-          <DialogFooter>
-            <Button
-              className="bg-[#FAD645] dark:text-black hover:bg-[#FAD645]/90"
-              onClick={() => {
-                setShowApiKeyDialog(false)
-                navigate('/token-management')
-              }}
-            >
-              Get Token
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
     </div>
   )
 }

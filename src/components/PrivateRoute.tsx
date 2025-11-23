@@ -15,7 +15,14 @@ export default function PrivateRoute({ children }: PrivateRouteProps) {
   const location = useLocation()
 
   if (!isAuthenticated) {
-    return <Navigate to="/login" replace state={{ from: location }} />
+    const currentPath = location.pathname + location.search
+    return (
+      <Navigate
+        to={`/login?rdr=${encodeURIComponent(currentPath)}`}
+        replace
+        state={{ from: location }}
+      />
+    )
   }
 
   return <>{children}</>

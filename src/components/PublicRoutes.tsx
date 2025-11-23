@@ -1,4 +1,4 @@
-import { Navigate, Outlet } from 'react-router-dom'
+import { Navigate, Outlet, useSearchParams } from 'react-router-dom'
 import { useEffect } from 'react'
 import { useAppSelector, useAppDispatch } from '@/redux/hooks'
 import { getCurrentUser } from '@/redux/slices/authSlice'
@@ -10,17 +10,16 @@ interface PublicRouteProps {
 export function PublicRoute({ redirectTo }: PublicRouteProps) {
   const isAuthenticated = useAppSelector((state) => state.auth.isAuthenticated)
   const dispatch = useAppDispatch()
+  const [searchParams] = useSearchParams()
+  const rdrKey = searchParams.get('rdr')
 
   useEffect(() => {
     dispatch(getCurrentUser())
   }, [dispatch])
 
   if (isAuthenticated) {
-    if (redirectTo) {
-      return <Navigate to={redirectTo} replace />
-    }
-
-    return <Navigate to="/dashboard" replace />
+    const redirectPath = rdrKey || redirectTo || '/dashboard'
+    return <Navigate to={redirectPath} replace />
   }
 
   return <Outlet />

@@ -72,10 +72,8 @@ export const fetchAllScanResults = createAsyncThunk(
   async (_, { rejectWithValue }) => {
     try {
       const response = await scanService.getAllScanResults()
-      console.log('fetchAllScanResults', response.data)
       return response.data
     } catch (error) {
-      console.log('fetchAllScanResults', error)
       const axiosError = error as {
         response?: { data?: { message?: string; detail?: string } }
         message?: string
@@ -149,7 +147,6 @@ const scanSlice = createSlice({
       })
       .addCase(fetchAllScanResults.fulfilled, (state, action) => {
         state.isLoading = false
-        console.log(action.payload)
         state.scanHistory = action.payload
       })
       .addCase(fetchAllScanResults.rejected, (state, action) => {

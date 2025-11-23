@@ -11,7 +11,6 @@ export interface AuthenticatedUser {
   email: string
   name?: string
   roles?: string[]
-  apiKey?: string
 }
 
 export interface SignupData {
@@ -126,7 +125,6 @@ const authSlice = createSlice({
       state.isAuthenticated = !!action.payload
     },
     updateSignupData(state, action: PayloadAction<Partial<SignupData>>) {
-      console.log('updateSignupData', action.payload)
       state.signupData = { ...state.signupData, ...action.payload }
     },
     clearSignupData(state) {
