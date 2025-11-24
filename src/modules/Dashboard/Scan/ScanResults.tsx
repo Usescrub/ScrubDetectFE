@@ -1,13 +1,20 @@
 import { useNavigate } from 'react-router-dom'
-import { useAppSelector } from '@/redux/hooks'
+import { useAppSelector, useAppDispatch } from '@/redux/hooks'
+import { clearCurrentScan } from '@/redux/slices/scanSlice'
 import { Card, CardContent } from '@/components/ui/card'
 import Button from '@/components/buttons/Button'
 import Warning2 from '@/assets/icons/warning-2.svg?react'
 import TickCircle from '@/assets/icons/tick-circle.svg?react'
+import File from '@/assets/icons/file.svg?react'
 
 const ScanResults = () => {
   const navigate = useNavigate()
+  const dispatch = useAppDispatch()
   const { currentScan } = useAppSelector((state) => state.scan)
+
+  const handleNewScan = () => {
+    dispatch(clearCurrentScan())
+  }
 
   if (!currentScan) {
     return (
@@ -218,8 +225,21 @@ const ScanResults = () => {
             </div>
           )}
 
-          {/* Back to Dashboard Button */}
-          <div className="flex justify-center">
+          {/* Action Buttons */}
+          <div className="flex justify-center gap-4">
+            <Button
+              className="bg-white dark:bg-[#1C1C1C] border border-[#E0E0E0] dark:border-[#333333] text-[#0E1B28] dark:text-[#D7E4F1] hover:bg-[#F9F9FB] dark:hover:bg-[#222222] [&&]:w-fit [&&]:px-6"
+              onClick={handleNewScan}
+            >
+              <span className="flex items-center gap-2 text-sm">
+                <File
+                  width={16}
+                  height={16}
+                  className="fill-[#0E1B28] dark:fill-[#D7E4F1]"
+                />
+                New Scan
+              </span>
+            </Button>
             <Button
               className="bg-[#FAD645] dark:text-black hover:bg-[#FAD645]/90 [&&]:w-fit [&&]:px-6"
               onClick={() => navigate('/dashboard')}
