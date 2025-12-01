@@ -138,6 +138,6 @@ export const authService = {
     const response = await apiClient.get<UserStatusResponse>(
       API_ENDPOINTS.AUTH.USER_STATUS(email)
     )
-    return response.data
+    return camelToSnake(response.data)
   },
 }
