@@ -35,14 +35,14 @@ const UnauthenticatedLayout = ({ children }: { children: React.ReactNode }) => {
           <div className="self-start">
             <ScrubIcon />
           </div>
-          <div className="flex ml-[55px] items-center mx-auto w-full">
+          <div className="flex md:pl-[35px] items-center w-full">
             {children}
           </div>
           <div className="self-start">
             <ThemeSwitcher />
           </div>
         </div>
-        <div className="w-full h-full basis-[50%]">
+        <div className="w-full md:h-full basis-[50%]">
           <img
             src={image}
             alt="page-image"

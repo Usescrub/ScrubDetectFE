@@ -50,7 +50,7 @@ export default function Select({
           name={name}
           value={field.value}
           onChange={handleChange}
-          className="text-light-grey appearance-none w-full bg-transparent outline-none pr-8"
+          className="dark:text-white text-light-grey appearance-none w-full bg-transparent outline-none pr-8"
         >
           <option value="" disabled>
             {placeholder}

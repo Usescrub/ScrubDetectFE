@@ -2,6 +2,8 @@ import { useNavigate } from 'react-router-dom'
 import { useForm } from 'react-hook-form'
 import { z } from 'zod'
 import { zodResolver } from '@hookform/resolvers/zod'
+import { CornerUpLeft } from 'lucide-react'
+
 import { useAppDispatch } from '@/redux/hooks'
 import { updateSignupData } from '@/redux/slices/authSlice'
 
@@ -59,7 +61,7 @@ export default function JoinUs() {
 
   return (
     <UnauthenticatedLayout>
-      <div className="max-w-[508px] w-full h-[425px]">
+      <div className="max-w-[508px] w-full h-[425px] px-2">
         <div className="mb-7 text">
           <h2 className="font-semibold text-[2rem] mb-2">Join Us</h2>
           <p className="text-light-grey font-normal">
@@ -88,7 +90,7 @@ export default function JoinUs() {
           </div>
           <Input
             type="email"
-            placeholder="Enter your work email"
+            placeholder="Enter your email"
             icon={MailIcon}
             classname="w-full"
             name="email"
@@ -110,7 +112,11 @@ export default function JoinUs() {
               className="bg-btn-lightGray dark:bg-[#232323] w-full"
               onClick={() => navigate('/login')}
             >
-              Back To Log In
+              <span className="md:block hidden">Back To Log In</span>
+
+              <span className="md:hidden block">
+                <CornerUpLeft className="w-5 h-5" />
+              </span>
             </Button>
             <Button
               className="bg-yellow dark:text-black"

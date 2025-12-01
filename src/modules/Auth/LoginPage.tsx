@@ -18,8 +18,11 @@ import UnauthenticatedLayout from '@/layouts/UnauthenticatedLayout'
 
 const formSchema = z
   .object({
-    email: z.email(),
-    password: z.string(),
+    email: z
+      .string()
+      .min(1, 'Email is required')
+      .email('Invalid email address'),
+    password: z.string().min(8, 'Password is required'),
   })
   .required()
 
@@ -52,11 +55,13 @@ export default function LoginPage() {
       const redirectPath = rdrKey || from || '/dashboard'
       navigate(redirectPath, { replace: true })
     }
-  }, [isAuthenticated, navigate, searchParams, location])
+  }, [isAuthenticated, navigate, searchParams, location.state])
 
   const onSubmit = async (data: FormType) => {
     try {
-      await dispatch(login({ email: data.email, password: data.password }))
+      await dispatch(
+        login({ email: data.email, password: data.password })
+      ).unwrap()
       toast.success('Login successful')
     } catch (error) {
       const errorMessage =
@@ -71,7 +76,7 @@ export default function LoginPage() {
 
   return (
     <UnauthenticatedLayout>
-      <div className="max-w-[508px] h-[405px] w-full">
+      <div className="max-w-[508px] h-[405px] w-full px-2">
         <div className="mb-7 text">
           <h2 className="font-semibold text-[2rem] mb-2">Log In</h2>
           <p className="text-light-grey font-normal">
@@ -103,7 +108,7 @@ export default function LoginPage() {
           />
           <div className="flex w-full justify-between my-5 gap-2.5">
             <Button className="bg-[#E9E9E9] dark:bg-[#232323] gap-2.5" path="">
-              <span className="font-medium text-black dark:text-white">
+              <span className="font-medium text-black dark:text-white md:block hidden">
                 Sign in with Google
               </span>
               <img src={googleIcon} alt="google-icon" width={24} height={24} />
