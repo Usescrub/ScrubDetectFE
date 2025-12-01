@@ -1,8 +1,9 @@
 import type { AuthenticatedUser } from '@/redux/slices/authSlice'
-import { camelToSnake } from '@/lib/utils'
+import { camelToSnake, snakeToCamel } from '@/lib/utils'
 
 import apiClient from './api'
 import { API_ENDPOINTS } from './config'
+import { SIGNUP_ACCESS_TOKEN_KEY } from '@/constants'
 
 export interface LoginRequest {
   email: string
@@ -59,13 +60,8 @@ export interface CreatePasswordResponse {
 }
 
 export interface UserStatusResponse {
-  success: boolean
-  data: {
-    email: string
-    isActive: boolean
-    isVerified: boolean
-  }
-  message?: string
+  isActive: boolean
+  isVerified: boolean
 }
 
 export const authService = {
@@ -129,7 +125,14 @@ export const authService = {
   ): Promise<CreatePasswordResponse> {
     const response = await apiClient.post<CreatePasswordResponse>(
       API_ENDPOINTS.AUTH.PASSWORD,
-      data
+      data,
+      {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem(
+            SIGNUP_ACCESS_TOKEN_KEY
+          )}`,
+        },
+      }
     )
     return response.data
   },
@@ -138,6 +141,6 @@ export const authService = {
     const response = await apiClient.get<UserStatusResponse>(
       API_ENDPOINTS.AUTH.USER_STATUS(email)
     )
-    return camelToSnake(response.data)
+    return snakeToCamel(response.data)
   },
 }

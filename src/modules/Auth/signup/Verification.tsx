@@ -1,4 +1,4 @@
-import { useEffect, useState, useRef } from 'react'
+import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { toast } from 'sonner'
 import { authService } from '@/services/authService'
@@ -20,7 +20,6 @@ export default function Verification() {
   const [isResending, setIsResending] = useState(false)
   const [isActivated, setIsActivated] = useState(false)
   const [isPolling, setIsPolling] = useState(false)
-  const pollingIntervalRef = useRef<NodeJS.Timeout | null>(null)
 
   useEffect(() => {
     if (!signupData.email) {
@@ -51,33 +50,29 @@ export default function Verification() {
     const checkUserStatus = async () => {
       try {
         const response = await authService.getUserStatus(email)
-        if (response.data?.isActive || response.data?.isVerified) {
+        if (response?.isActive && response?.isVerified) {
           setIsActivated(true)
           setIsPolling(false)
-          if (pollingIntervalRef.current) {
-            clearInterval(pollingIntervalRef.current)
-            pollingIntervalRef.current = null
-          }
-          toast.success('Account verified successfully!')
         }
+        return false
       } catch (error) {
         console.error('Error checking user status:', error)
+        return null
       }
     }
 
-    setIsPolling(true)
-    checkUserStatus()
+    const intervalPolling = setInterval(() => {
+      if (isActivated) {
+        clearInterval(intervalPolling)
+        setIsPolling(false)
+        return
+      }
+      setIsPolling(true)
 
-    pollingIntervalRef.current = setInterval(() => {
       checkUserStatus()
     }, POLLING_INTERVAL)
 
-    return () => {
-      if (pollingIntervalRef.current) {
-        clearInterval(pollingIntervalRef.current)
-        pollingIntervalRef.current = null
-      }
-    }
+    return () => clearInterval(intervalPolling)
   }, [email, isActivated])
 
   const handleResendVerification = async () => {
@@ -177,7 +172,7 @@ export default function Verification() {
                   onClick={() => navigate('/signup/create-password')}
                   disabled={!isActivated}
                 >
-                  {isPolling && !isActivated
+                  {isPolling || !isActivated
                     ? 'Waiting for verification...'
                     : 'Proceed'}
                 </Button>

@@ -1,7 +1,11 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit'
 import type { PayloadAction } from '@reduxjs/toolkit'
 
-import { ACCESS_TOKEN_KEY, REFRESH_TOKEN_KEY } from '@/constants'
+import {
+  ACCESS_TOKEN_KEY,
+  REFRESH_TOKEN_KEY,
+  SIGNUP_ACCESS_TOKEN_KEY,
+} from '@/constants'
 import { authService, type LoginRequest } from '@/services/authService'
 
 import type { RootState } from '../store'
@@ -43,8 +47,7 @@ export const login = createAsyncThunk(
   'auth/login',
   async (credentials: LoginRequest, { rejectWithValue }) => {
     try {
-      const response = await authService.login(credentials)
-      return response
+      return await authService.login(credentials)
     } catch (error) {
       return rejectWithValue(
         (error as { response?: { data?: { message?: string } } }).response?.data
@@ -81,8 +84,8 @@ export const signup = createAsyncThunk(
   'auth/signup',
   async (_, { rejectWithValue, getState }) => {
     try {
-      const signupData = (getState() as RootState).auth.signupData
-      const response = await authService.signup({
+      const { signupData } = (getState() as RootState).auth
+      return await authService.signup({
         fullName: `${signupData.firstName} ${signupData.lastName}`,
         username: `${signupData.firstName}.${signupData.lastName}@${signupData.company}.com`,
         email: signupData.email!,
@@ -93,7 +96,6 @@ export const signup = createAsyncThunk(
         role: signupData.role!,
         country: signupData.country!,
       })
-      return response
     } catch (error) {
       return rejectWithValue(
         (error as { response?: { data?: { message?: string } } }).response?.data
@@ -129,6 +131,7 @@ const authSlice = createSlice({
     },
     clearSignupData(state) {
       state.signupData = {}
+      localStorage.clearItem(SIGNUP_ACCESS_TOKEN_KEY)
     },
   },
   extraReducers: (builder) => {
@@ -175,10 +178,10 @@ const authSlice = createSlice({
     builder
       .addCase(signup.fulfilled, (state, action) => {
         state.user = action.payload.user
-        localStorage.setItem(ACCESS_TOKEN_KEY, action.payload.accessToken)
-        if (action.payload.refreshToken) {
-          localStorage.setItem(REFRESH_TOKEN_KEY, action.payload.refreshToken)
-        }
+        localStorage.setItem(
+          SIGNUP_ACCESS_TOKEN_KEY,
+          action.payload.accessToken
+        )
       })
       .addCase(signup.rejected, () => {})
   },

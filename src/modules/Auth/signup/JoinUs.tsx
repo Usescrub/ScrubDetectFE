@@ -47,7 +47,6 @@ export default function JoinUs() {
   })
 
   const onSubmit = (data: JoinUsFormType) => {
-    console.log('data', data)
     dispatch(
       updateSignupData({
         firstName: data.firstName,
