@@ -35,7 +35,7 @@ const UnauthenticatedLayout = ({ children }: { children: React.ReactNode }) => {
           <div className="self-start">
             <ScrubIcon />
           </div>
-          <div className="flex md:pl-[35px] items-center w-full">
+          <div className="flex md:pl-[35px] items-center w-full px-1">
             {children}
           </div>
           <div className="self-start">

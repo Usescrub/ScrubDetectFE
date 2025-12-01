@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { toast } from 'sonner'
 import { authService } from '@/services/authService'
@@ -11,11 +11,16 @@ import WarningTag from '@/assets/icons/warning-2.svg?react'
 import TickTag from '@/assets/icons/tick-circle.svg?react'
 import UnauthenticatedLayout from '@/layouts/UnauthenticatedLayout'
 
+const POLLING_INTERVAL = 3000
+
 export default function Verification() {
   const navigate = useNavigate()
   const { signupData } = useAppSelector((state) => state.auth)
   const [email, setEmail] = useState<string>('')
   const [isResending, setIsResending] = useState(false)
+  const [isActivated, setIsActivated] = useState(false)
+  const [isPolling, setIsPolling] = useState(false)
+  const pollingIntervalRef = useRef<NodeJS.Timeout | null>(null)
 
   useEffect(() => {
     if (!signupData.email) {
@@ -24,6 +29,56 @@ export default function Verification() {
     }
     setEmail(signupData.email)
   }, [navigate, signupData])
+
+  useEffect(() => {
+    const handleBeforeUnload = (e: BeforeUnloadEvent) => {
+      if (isPolling && !isActivated) {
+        e.preventDefault()
+        e.returnValue = ''
+      }
+    }
+
+    window.addEventListener('beforeunload', handleBeforeUnload)
+
+    return () => {
+      window.removeEventListener('beforeunload', handleBeforeUnload)
+    }
+  }, [isPolling, isActivated])
+
+  useEffect(() => {
+    if (!email || isActivated) return
+
+    const checkUserStatus = async () => {
+      try {
+        const response = await authService.getUserStatus(email)
+        if (response.data?.isActive || response.data?.isVerified) {
+          setIsActivated(true)
+          setIsPolling(false)
+          if (pollingIntervalRef.current) {
+            clearInterval(pollingIntervalRef.current)
+            pollingIntervalRef.current = null
+          }
+          toast.success('Account verified successfully!')
+        }
+      } catch (error) {
+        console.error('Error checking user status:', error)
+      }
+    }
+
+    setIsPolling(true)
+    checkUserStatus()
+
+    pollingIntervalRef.current = setInterval(() => {
+      checkUserStatus()
+    }, POLLING_INTERVAL)
+
+    return () => {
+      if (pollingIntervalRef.current) {
+        clearInterval(pollingIntervalRef.current)
+        pollingIntervalRef.current = null
+      }
+    }
+  }, [email, isActivated])
 
   const handleResendVerification = async () => {
     if (!email) return
@@ -46,7 +101,7 @@ export default function Verification() {
   }
   return (
     <UnauthenticatedLayout>
-      <div className="max-w-[508px] w-full h-[425px]">
+      <div className="max-w-[508px] w-full h-[425px] px-2">
         <div className="mb-7 text">
           <h2 className="font-semibold text-[2rem] mb-2">
             Verification Link Sent!
@@ -57,6 +112,25 @@ export default function Verification() {
             <span className="text-light-grey font-medium">&nbsp; {email}</span>
             &nbsp; to verify your account.
           </p>
+          {isPolling && !isActivated && (
+            <div className="mt-2">
+              <p className="text-sm text-[#DF9300] dark:text-[#FAD645] mb-2">
+                Checking verification status...
+              </p>
+              <div className="flex items-start gap-2 p-3 bg-[#FDF8EF] dark:bg-[#1a1a0a] rounded-lg border border-[#FAD645]/30">
+                <WarningTag className="w-4 h-4 text-[#DF9300] dark:text-[#FAD645] flex-shrink-0 mt-0.5" />
+                <p className="text-xs text-[#0E1B28] dark:text-[#D7E4F1]">
+                  Please do not reload or close this page while we verify your
+                  account.
+                </p>
+              </div>
+            </div>
+          )}
+          {isActivated && (
+            <p className="text-sm text-[#0CB95B] mt-2">
+              ✓ Account verified! You can now proceed.
+            </p>
+          )}
         </div>
         <div>
           <div className="w-full flex flex-col justify-center items-center gap-5">
@@ -101,8 +175,11 @@ export default function Verification() {
                 <Button
                   className="bg-yellow dark:text-black"
                   onClick={() => navigate('/signup/create-password')}
+                  disabled={!isActivated}
                 >
-                  Proceed
+                  {isPolling && !isActivated
+                    ? 'Waiting for verification...'
+                    : 'Proceed'}
                 </Button>
               </div>
             </div>

@@ -13,6 +13,7 @@ export default function ThemeSwitcher() {
   useEffect(() => {
     document.documentElement.classList.toggle('dark', isDark)
     localStorage.setItem('theme', isDark ? 'dark' : 'light')
+    window.dispatchEvent(new CustomEvent('themechange', { detail: { isDark } }))
   }, [isDark])
 
   function handleThemeSwitcher() {

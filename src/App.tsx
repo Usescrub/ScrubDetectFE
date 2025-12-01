@@ -9,6 +9,7 @@ import Password from './modules/Auth/Password'
 import JoinUs from './modules/Auth/signup/JoinUs'
 import Details from './modules/Auth/signup/Details'
 import Verification from './modules/Auth/signup/Verification'
+import VerifyEmail from './modules/Auth/VerifyEmail'
 import Dashboard from './modules/Dashboard'
 import Scan from './modules/Dashboard/Scan'
 import TokenManagement from './modules/Dashboard/TokenManagement'
@@ -32,6 +33,7 @@ const router = createBrowserRouter([
         path: 'new-password',
         element: <Password title="Create a New Password" />,
       },
+      { path: 'verify-email', element: <VerifyEmail /> },
       {
         path: '/signup',
         children: [

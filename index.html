@@ -2,8 +2,64 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-    <link rel="apple-touch-icon" href="/favicon.svg" />
+    <link
+      id="favicon"
+      rel="icon"
+      type="image/svg+xml"
+      href="/favicon-light.svg"
+    />
+    <link rel="apple-touch-icon" href="/favicon-light.svg" />
+    <script>
+      ;(function () {
+        function updateFavicon() {
+          const savedTheme = localStorage.getItem('theme')
+          const prefersDark = window.matchMedia(
+            '(prefers-color-scheme: dark)'
+          ).matches
+          const hasDarkClass =
+            document.documentElement.classList.contains('dark')
+          const isDark = savedTheme
+            ? savedTheme === 'dark'
+            : hasDarkClass || prefersDark
+
+          const favicon = document.getElementById('favicon')
+          const appleTouchIcon = document.querySelector(
+            'link[rel="apple-touch-icon"]'
+          )
+
+          if (isDark) {
+            favicon.href = '/favicon-dark.svg'
+            if (appleTouchIcon) appleTouchIcon.href = '/favicon-dark.svg'
+          } else {
+            favicon.href = '/favicon-light.svg'
+            if (appleTouchIcon) appleTouchIcon.href = '/favicon-light.svg'
+          }
+        }
+
+        updateFavicon()
+
+        const observer = new MutationObserver(function (mutations) {
+          mutations.forEach(function (mutation) {
+            if (
+              mutation.type === 'attributes' &&
+              mutation.attributeName === 'class'
+            ) {
+              updateFavicon()
+            }
+          })
+        })
+
+        observer.observe(document.documentElement, {
+          attributes: true,
+          attributeFilter: ['class'],
+        })
+
+        window.addEventListener('themechange', updateFavicon)
+        window
+          .matchMedia('(prefers-color-scheme: dark)')
+          .addEventListener('change', updateFavicon)
+      })()
+    </script>
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta
       name="description"

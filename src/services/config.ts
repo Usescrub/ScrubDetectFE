@@ -14,6 +14,8 @@ export const API_ENDPOINTS = {
     VERIFY_EMAIL: '/api/v1/auth/verify-email',
     RESEND_VERIFICATION: '/api/v1/auth/resend-verification',
     PASSWORD: '/api/v1/auth/password',
+    USER_STATUS: (email: string) =>
+      `/api/v1/auth/user-status?email=${encodeURIComponent(email)}`,
   },
   DETECTION: {
     DETECT_FILE: '/api/v1/detect/file',

@@ -199,7 +199,7 @@ export default function Details() {
 
   return (
     <UnauthenticatedLayout>
-      <div className="max-w-[508px] w-full h-[425px]">
+      <div className="max-w-[508px] w-full h-[425px] px-2">
         <div className="mb-7 text">
           <h2 className="font-semibold text-[2rem] mb-2">
             Company & Role Details

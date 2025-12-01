@@ -58,6 +58,16 @@ export interface CreatePasswordResponse {
   message?: string
 }
 
+export interface UserStatusResponse {
+  success: boolean
+  data: {
+    email: string
+    isActive: boolean
+    isVerified: boolean
+  }
+  message?: string
+}
+
 export const authService = {
   async login(credentials: LoginRequest): Promise<LoginResponse> {
     const response = await apiClient.post<LoginResponse>(
@@ -120,6 +130,13 @@ export const authService = {
     const response = await apiClient.post<CreatePasswordResponse>(
       API_ENDPOINTS.AUTH.PASSWORD,
       data
+    )
+    return response.data
+  },
+
+  async getUserStatus(email: string): Promise<UserStatusResponse> {
+    const response = await apiClient.get<UserStatusResponse>(
+      API_ENDPOINTS.AUTH.USER_STATUS(email)
     )
     return response.data
   },
