@@ -256,7 +256,7 @@ export default function Details() {
           <div className="controls flex justify-between items-center w-full gap-x-2.5">
             <Button
               className="bg-btn-lightGray dark:bg-[#232323]"
-              onClick={() => navigate('/signup/join-us')}
+              onClick={() => navigate('/signup/join-us', { replace: true })}
             >
               Go Back
             </Button>
