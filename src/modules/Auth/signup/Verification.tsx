@@ -11,7 +11,7 @@ import WarningTag from '@/assets/icons/warning-2.svg?react'
 import TickTag from '@/assets/icons/tick-circle.svg?react'
 import UnauthenticatedLayout from '@/layouts/UnauthenticatedLayout'
 
-const POLLING_INTERVAL = 3000
+const POLLING_INTERVAL = 5000
 
 export default function Verification() {
   const navigate = useNavigate()
