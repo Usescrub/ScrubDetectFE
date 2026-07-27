@@ -118,7 +118,7 @@ const ControlsTab = ({ user }: Props) => {
     return () => {
       cancelled = true
     }
-  }, [user.organisationId])
+  }, [user.organisationId, section])
 
   const onSubmit = async (data: FormType) => {
     if (!isAdmin) return

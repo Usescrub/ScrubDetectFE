@@ -23,8 +23,9 @@ export const API_ENDPOINTS = {
   },
   DETECTION: {
     DETECT_FILE: '/api/v1/detect/file',
-    GET_RESULT: (id: string) => `/api/v1/detect/result/${id}`,
+    GET_SCAN: (id: string) => `/api/v1/detect/scans/${id}`,
     GET_ALL_RESULTS: '/api/v1/detect/scans',
+    REJECT_SCAN: (id: string) => `/api/v1/detect/scans/${id}/reject`,
   },
   TOKENS: {
     CREATE: '/api/v1/auth/tokens',

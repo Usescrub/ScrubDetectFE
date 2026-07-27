@@ -86,10 +86,10 @@ export default function Password({ title }: PasswordProps) {
         typeof error === 'string'
           ? error
           : (error as { response?: { data?: { detail?: string; message?: string } } })
-              ?.response?.data?.detail ||
-            (error as { response?: { data?: { message?: string } } })?.response
-              ?.data?.message ||
-            'Failed to create password. Please try again.'
+            ?.response?.data?.detail ||
+          (error as { response?: { data?: { message?: string } } })?.response
+            ?.data?.message ||
+          'Failed to create password. Please try again.'
       toast.error(errorMessage)
     }
   }

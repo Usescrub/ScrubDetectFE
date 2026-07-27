@@ -1,19 +1,38 @@
+import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { toast } from 'sonner'
 import { useAppSelector, useAppDispatch } from '@/redux/hooks'
-import { clearCurrentScan } from '@/redux/slices/scanSlice'
+import { clearCurrentScan, rejectScanAnalysis } from '@/redux/slices/scanSlice'
 import { Card, CardContent } from '@/components/ui/card'
 import Button from '@/components/buttons/Button'
 import Warning2 from '@/assets/icons/warning-2.svg?react'
 import TickCircle from '@/assets/icons/tick-circle.svg?react'
 import File from '@/assets/icons/file.svg?react'
+import RejectScanDialog from './RejectScanDialog'
 
 const ScanResults = () => {
   const navigate = useNavigate()
   const dispatch = useAppDispatch()
   const { currentScan } = useAppSelector((state) => state.scan)
+  const [showRejectDialog, setShowRejectDialog] = useState(false)
+  const [isRejecting, setIsRejecting] = useState(false)
 
   const handleNewScan = () => {
     dispatch(clearCurrentScan())
+  }
+
+  const handleReject = async () => {
+    if (!currentScan) return
+    setIsRejecting(true)
+    try {
+      await dispatch(rejectScanAnalysis(currentScan.id)).unwrap()
+      toast.success('Analysis rejected')
+      setShowRejectDialog(false)
+    } catch (error) {
+      toast.error(typeof error === 'string' ? error : 'Failed to reject analysis')
+    } finally {
+      setIsRejecting(false)
+    }
   }
 
   if (!currentScan) {
@@ -26,39 +45,35 @@ const ScanResults = () => {
     )
   }
 
+  const isRejected = currentScan.reviewStatus === 'rejected'
+
   const getStatusColor = (status: string) => {
-    if (status === 'completed') {
-      return 'bg-[#0CB95B]'
-    }
+    if (status === 'completed') return 'bg-[#0CB95B]'
+    if (status === 'rejected') return 'bg-[#E31E18]'
     return 'bg-[#E31E18]'
   }
 
   const getStatusTextColor = (status: string) => {
-    if (status === 'completed') {
-      return 'bg-[#EBFAF5] text-[#0CB95B]'
-    }
+    if (status === 'completed') return 'bg-[#EBFAF5] text-[#0CB95B]'
+    if (status === 'rejected') return 'bg-[#FDEDED] text-[#E31E18]'
     return 'bg-[#FDEDED] text-[#E31E18]'
   }
 
   const getScanStatusColor = (status: string) => {
-    if (status === 'completed') {
-      return 'bg-[#EBFAF5] text-[#0CB95B]'
-    }
-    if (status === 'failed') {
-      return 'bg-[#FDEDED] text-[#E31E18]'
-    }
+    if (status === 'completed') return 'bg-[#EBFAF5] text-[#0CB95B]'
+    if (status === 'failed') return 'bg-[#FDEDED] text-[#E31E18]'
+    if (status === 'rejected') return 'bg-[#FDEDED] text-[#E31E18]'
     return 'bg-[#FDF8EF] text-[#DF9300]'
   }
 
   const getScanStatusDot = (status: string) => {
-    if (status === 'completed') {
-      return 'bg-[#0CB95B]'
-    }
-    if (status === 'failed') {
-      return 'bg-[#E31E18]'
-    }
+    if (status === 'completed') return 'bg-[#0CB95B]'
+    if (status === 'failed') return 'bg-[#E31E18]'
+    if (status === 'rejected') return 'bg-[#E31E18]'
     return 'bg-[#DF9300]'
   }
+
+  const displayStatus = isRejected ? 'rejected' : currentScan.scanStatus
 
   return (
     <div className="w-full h-full flex flex-col">
@@ -68,7 +83,6 @@ const ScanResults = () => {
 
       <Card className="w-full bg-white dark:bg-[#0D0D0D]">
         <CardContent className="px-6 py-8">
-          {/* First Detection Summary - File Information */}
           <div className="mb-8">
             <h3 className="text-lg font-semibold mb-4 text-[#0E1B28] dark:text-[#D7E4F1]">
               Detection Summary
@@ -79,7 +93,7 @@ const ScanResults = () => {
                   File Name
                 </p>
                 <p className="text-base font-medium text-[#0E1B28] dark:text-[#D7E4F1]">
-                  {currentScan?.fileName}
+                  {currentScan.fileName}
                 </p>
               </div>
               <div>
@@ -87,7 +101,7 @@ const ScanResults = () => {
                   File Type
                 </p>
                 <p className="text-base font-medium text-[#0E1B28] dark:text-[#D7E4F1] uppercase">
-                  {currentScan?.fileType}
+                  {currentScan.fileType}
                 </p>
               </div>
               <div>
@@ -95,7 +109,7 @@ const ScanResults = () => {
                   Uploaded By
                 </p>
                 <p className="text-base font-medium text-[#0E1B28] dark:text-[#D7E4F1]">
-                  {currentScan?.uploadedBy}
+                  {currentScan.uploadedBy}
                 </p>
               </div>
               <div>
@@ -104,15 +118,15 @@ const ScanResults = () => {
                 </p>
                 <div
                   className={`${getScanStatusColor(
-                    currentScan?.scanStatus
+                    displayStatus
                   )} items-center flex capitalize py-1 px-2 text-xs w-fit rounded-2xl`}
                 >
                   <div
                     className={`rounded-full h-[8px] w-[8px] mr-1 ${getScanStatusDot(
-                      currentScan?.scanStatus
+                      displayStatus
                     )}`}
                   ></div>
-                  <div>{currentScan?.scanStatus}</div>
+                  <div>{displayStatus}</div>
                 </div>
               </div>
               <div className="col-span-2">
@@ -120,13 +134,12 @@ const ScanResults = () => {
                   Upload Date
                 </p>
                 <p className="text-base font-medium text-[#0E1B28] dark:text-[#D7E4F1]">
-                  {currentScan?.uploadDate}
+                  {currentScan.uploadDate}
                 </p>
               </div>
             </div>
           </div>
 
-          {/* Second Detection Summary - Scan Results */}
           <div className="mb-6">
             <h3 className="text-lg font-semibold mb-4 text-[#0E1B28] dark:text-[#D7E4F1]">
               Detection Summary
@@ -144,7 +157,6 @@ const ScanResults = () => {
                 </div>
               </div>
 
-              {/* Document Validity Row */}
               <div className="grid grid-cols-3 border-b border-[#E0E0E0] dark:border-[#333333]">
                 <div className="px-4 py-4 text-sm text-[#0E1B28] dark:text-[#D7E4F1]">
                   Document Validity
@@ -152,81 +164,81 @@ const ScanResults = () => {
                 <div className="px-4 py-4">
                   <div
                     className={`${getStatusTextColor(
-                      currentScan?.scanStatus
+                      isRejected ? 'rejected' : currentScan.scanStatus
                     )} items-center flex capitalize py-1 px-2 text-xs w-fit rounded-2xl`}
                   >
                     <div
                       className={`rounded-full h-[8px] w-[8px] mr-1 ${getStatusColor(
-                        currentScan?.scanStatus
+                        isRejected ? 'rejected' : currentScan.scanStatus
                       )}`}
                     ></div>
                     <div className="capitalize">
-                      {currentScan?.aiGeneratedScore &&
-                      currentScan?.aiGeneratedScore > 0.5
-                        ? 'Invalid'
-                        : 'Valid'}
+                      {isRejected
+                        ? 'Rejected'
+                        : currentScan.aiGeneratedScore &&
+                            currentScan.aiGeneratedScore > 0.5
+                          ? 'Invalid'
+                          : 'Valid'}
                     </div>
                   </div>
                 </div>
-                {/* <div className="px-4 py-4 text-sm text-[#0E1B28] dark:text-[#D7E4F1]">
-                  {currentScan?.documentValidity.resultSummary}
-                </div> */}
+                <div className="px-4 py-4 text-sm text-[#0E1B28] dark:text-[#D7E4F1] capitalize">
+                  {isRejected
+                    ? 'Rejected'
+                    : currentScan.aiGeneratedScore &&
+                        currentScan.aiGeneratedScore > 0.5
+                      ? 'AI Generated'
+                      : 'Human Generated'}
+                </div>
               </div>
               <div className="grid grid-cols-3 border-b border-[#E0E0E0] dark:border-[#333333]">
                 <div className="px-4 py-4 text-sm text-[#0E1B28] dark:text-[#D7E4F1]">
-                  Document Score
+                  Document AI Score
                 </div>
                 <div className="px-4 py-4">
                   <div className="capitalize">
-                    {currentScan?.aiGeneratedScore * 100}%
+                    {(currentScan.aiGeneratedScore ?? 0) * 100}%
                   </div>
                 </div>
+                <div className="px-4 py-4" />
               </div>
-
-              {/* Tampering Detected Row */}
-              {/* <div className="grid grid-cols-3">
-                <div className="px-4 py-4 text-sm text-[#0E1B28] dark:text-[#D7E4F1]">
-                  Tampering Detected
-                </div>
-                <div className="px-4 py-4">
-                  <div
-                    className={`${getStatusTextColor(
-                      currentScan?.tamperingDetected.status
-                    )} items-center flex capitalize py-2 px-4 w-fit rounded-2xl`}
-                  >
-                    <div
-                      className={`rounded-full h-[8px] w-[8px] mr-3 ${getStatusColor(
-                        currentScan?.tamperingDetected.status
-                      )}`}
-                    ></div>
-                    <div className="capitalize">
-                      {currentScan?.tamperingDetected.status === 'detected'
-                        ? 'Detected'
-                        : 'Not Detected'}
-                    </div>
-                  </div>
-                </div>
-                <div className="px-4 py-4 text-sm text-[#0E1B28] dark:text-[#D7E4F1]">
-                  {currentScan?.tamperingDetected.resultSummary}
-                </div>
-              </div> */}
             </div>
           </div>
 
-          {/* Warning Message */}
-          {currentScan?.warningMessage && (
-            <div className="mb-6 p-4 bg-[#FDF8EF] dark:bg-[#1a1a0a] rounded-lg border border-[#FAD645]/30">
+          {isRejected && (
+            <div className="mb-6 p-4 bg-[#FDEDED] dark:bg-[#2a1a1a] rounded-lg border border-[#E31E18]/30">
               <div className="flex items-start gap-3">
-                <Warning2 className="w-5 h-5 text-[#DF9300] flex-shrink-0 mt-0.5" />
+                <Warning2 className="w-5 h-5 text-[#E31E18] flex-shrink-0 mt-0.5" />
                 <p className="text-sm text-[#0E1B28] dark:text-[#D7E4F1]">
-                  {currentScan?.warningMessage}
+                  This analysis has been rejected and should not be used for
+                  decision-making.
                 </p>
               </div>
             </div>
           )}
 
-          {/* Action Buttons */}
-          <div className="flex justify-center gap-4">
+          {!isRejected && currentScan.warningMessage && (
+            <div className="mb-6 p-4 bg-[#FDF8EF] dark:bg-[#1a1a0a] rounded-lg border border-[#FAD645]/30">
+              <div className="flex items-start gap-3">
+                <Warning2 className="w-5 h-5 text-[#DF9300] flex-shrink-0 mt-0.5" />
+                <p className="text-sm text-[#0E1B28] dark:text-[#D7E4F1]">
+                  {currentScan.warningMessage}
+                </p>
+              </div>
+            </div>
+          )}
+
+          <div className="flex justify-center gap-4 flex-wrap">
+            {!isRejected && (
+              <Button
+                className="bg-[#E31E18] text-white hover:bg-[#E31E18]/90 [&&]:w-fit [&&]:px-6"
+                onClick={() => setShowRejectDialog(true)}
+              >
+                <span className="flex items-center gap-2 text-sm">
+                  Reject analysis
+                </span>
+              </Button>
+            )}
             <Button
               className="bg-white dark:bg-[#1C1C1C] border border-[#E0E0E0] dark:border-[#333333] text-[#0E1B28] dark:text-[#D7E4F1] hover:bg-[#F9F9FB] dark:hover:bg-[#222222] [&&]:w-fit [&&]:px-6"
               onClick={handleNewScan}
@@ -252,6 +264,14 @@ const ScanResults = () => {
           </div>
         </CardContent>
       </Card>
+
+      <RejectScanDialog
+        scan={currentScan}
+        open={showRejectDialog}
+        isSubmitting={isRejecting}
+        onOpenChange={setShowRejectDialog}
+        onConfirm={handleReject}
+      />
     </div>
   )
 }

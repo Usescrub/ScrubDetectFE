@@ -136,8 +136,8 @@ const AppSidebar = ({ ...props }: React.ComponentProps<typeof Sidebar>) => {
                             className="text-[#D7E4F1] cursor-pointer"
                           >
                             <item.icon
-                              width={25}
-                              height={25}
+                              width={20}
+                              height={20}
                               className="ml-1"
                             />
                             <>{item.title}</>
@@ -162,8 +162,8 @@ const AppSidebar = ({ ...props }: React.ComponentProps<typeof Sidebar>) => {
                             )}
                           >
                             <IconComponent
-                              width={25}
-                              height={25}
+                              width={20}
+                              height={20}
                               className="ml-1"
                             />
                             <>{item.title}</>

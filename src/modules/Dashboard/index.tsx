@@ -1,7 +1,7 @@
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { type ColumnDef } from '@tanstack/react-table'
 import { cn } from '@/lib/utils'
+import { toast } from 'sonner'
 
 import Button from '@/components/buttons/Button'
 import { Card, CardDescription, CardContent } from '@/components/ui/card'
@@ -17,123 +17,37 @@ import {
 import { useAppSelector, useAppDispatch } from '@/redux/hooks'
 
 import ArrowLeft from '@/assets/icons/arrow-left.svg?react'
-import File from '@/assets/icons/file.svg?react'
 import Plus from '@/assets/icons/plus.svg?react'
 import Calendar from '@/assets/icons/calendar.svg?react'
 import Filter from '@/assets/icons/filter.svg?react'
 import Export from '@/assets/icons/export.svg?react'
 import Reload from '@/assets/icons/reload.svg?react'
-import { fetchAllScanResults } from '@/redux/slices/scanSlice'
+import {
+  fetchAllScanResults,
+  rejectScanAnalysis,
+  setCurrentScan,
+} from '@/redux/slices/scanSlice'
 import type { ScanResult } from '@/services/scanService'
 import { usageService } from '@/services/usageService'
 import { PricingModal } from '@/components/PricingModal'
 import FinancialReportsPanel from './FinancialReportsPanel'
-
-type TableData = {
-  id: string
-  date: number
-  status: 'completed' | 'failed' | 'processing'
-  fileName: string
-  type: 'PDF'
-  result: 'Sensitive'
-}
+import { createScanColumns } from './Scan/ScanActionsMenu'
+import RejectScanDialog from './Scan/RejectScanDialog'
 
 const filterObject = {
   completed: 'bg-[#0CB95B]',
   failed: 'bg-[#E31E18]',
   processing: 'bg-[#DF9300]',
+  rejected: 'bg-[#E31E18]',
 }
 
 type DashboardTab = 'scans' | 'financial-reports'
 
-const dashboardColumns: ColumnDef<ScanResult>[] = [
-  {
-    accessorKey: 'fileName',
-    header: 'FILE NAME',
-    cell: ({ row }) => (
-      <div className="capitalize">{row.getValue('fileName')}</div>
-    ),
-  },
-  {
-    accessorKey: 'status',
-    header: 'STATUS',
-    cell: ({ row }) => {
-      const status = row.original.scanStatus
-      const classNames: Record<TableData['status'], string> = {
-        completed: 'bg-[#EBFAF5] text-[#0CB95B]',
-        failed: 'bg-[#FDEDED] text-[#E31E18]',
-        processing: 'bg-[#FDF8EF] text-[#DF9300]',
-      }
-      const roundedClassname: Record<TableData['status'], string> = {
-        completed: 'bg-[#0CB95B]',
-        failed: 'bg-[#E31E18]',
-        processing: 'bg-[#DF9300]',
-      }
-
-      return (
-        <div
-          className={`${classNames[status]} items-center flex capitalize py-2 px-4 w-fit rounded-2xl`}
-        >
-          <div
-            className={`rounded-full h-[8px] w-[8px] mr-3 ${roundedClassname[status]}`}
-          ></div>
-          <div>{row.getValue('status')}</div>
-        </div>
-      )
-    },
-  },
-  {
-    accessorKey: 'fileType',
-    header: 'TYPE',
-    cell: ({ row }) => (
-      <div className="capitalize uppercase">{row.original.fileType}</div>
-    ),
-  },
-  {
-    accessorKey: 'aiGeneratedScore',
-    header: 'SCORE',
-    cell: ({ row }) => (
-      <div className="capitalize uppercase">
-        {row.original.aiGeneratedScore * 100}%
-      </div>
-    ),
-  },
-  {
-    accessorKey: 'result',
-    header: 'RESULT SUMMARY',
-    cell: ({ row }) => (
-      <div className="capitalize uppercase">
-        {row.original.aiGeneratedScore > 0.5
-          ? 'AI Generated'
-          : 'Human Generated'}
-      </div>
-    ),
-  },
-  {
-    accessorKey: 'uploadDate',
-    header: 'DATE',
-  },
-  {
-    id: 'actions',
-    header: () => (
-      <div className="w-full flex items-center justify-center">ACTIONS</div>
-    ),
-    enableHiding: false,
-    cell: () => {
-      return (
-        <div className="w-full flex items-center justify-center">
-          <div className="rounded-full w-[35px] h-[35px] bg-[#F5F6F6] dark:bg-[#161616] flex items-center justify-center">
-            <File />
-          </div>
-        </div>
-      )
-    },
-  },
-]
-
 const Dashboard = () => {
   const [filter, setFilter] = useState<string[]>([])
   const [activeTab, setActiveTab] = useState<DashboardTab>('scans')
+  const [rejectTarget, setRejectTarget] = useState<ScanResult | null>(null)
+  const [isRejecting, setIsRejecting] = useState(false)
   const { scanHistory } = useAppSelector((state) => state.scan)
   const dispatch = useAppDispatch()
   const navigate = useNavigate()
@@ -185,6 +99,43 @@ const Dashboard = () => {
         : [...prev, lower]
     )
   }
+
+  const handleViewScan = useCallback(
+    (scan: ScanResult) => {
+      dispatch(setCurrentScan(scan))
+      navigate('/scan')
+    },
+    [dispatch, navigate]
+  )
+
+  const handleRejectScan = async () => {
+    if (!rejectTarget) return
+    setIsRejecting(true)
+    try {
+      await dispatch(rejectScanAnalysis(rejectTarget.id)).unwrap()
+      toast.success('Analysis rejected')
+      setRejectTarget(null)
+    } catch (error) {
+      toast.error(typeof error === 'string' ? error : 'Failed to reject analysis')
+    } finally {
+      setIsRejecting(false)
+    }
+  }
+
+  const dashboardColumns = useMemo(
+    () =>
+      createScanColumns(handleViewScan, (scan) => setRejectTarget(scan)),
+    [handleViewScan]
+  )
+
+  const filteredScans = useMemo(() => {
+    if (filter.length === 0) return scanHistory
+    return scanHistory.filter((scan) => {
+      const status =
+        scan.reviewStatus === 'rejected' ? 'rejected' : scan.scanStatus
+      return filter.includes(status)
+    })
+  }, [filter, scanHistory])
 
   const scansUsed = quota?.scansUsed ?? 0
   const scanAllowance = quota?.scanAllowance ?? 0
@@ -337,7 +288,7 @@ const Dashboard = () => {
                 </div>
               </div>
             </div>
-            <AppTable data={scanHistory} columns={dashboardColumns} />
+            <AppTable data={filteredScans} columns={dashboardColumns} />
           </div>
         </>
       )}
@@ -348,6 +299,16 @@ const Dashboard = () => {
         isOpen={showPricing}
         onClose={() => setShowPricing(false)}
         currentPlan={plan}
+      />
+
+      <RejectScanDialog
+        scan={rejectTarget}
+        open={!!rejectTarget}
+        isSubmitting={isRejecting}
+        onOpenChange={(open) => {
+          if (!open) setRejectTarget(null)
+        }}
+        onConfirm={handleRejectScan}
       />
     </div>
   )

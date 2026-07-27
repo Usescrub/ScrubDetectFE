@@ -87,6 +87,27 @@ export const fetchAllScanResults = createAsyncThunk(
   }
 )
 
+export const rejectScanAnalysis = createAsyncThunk(
+  'scan/rejectScanAnalysis',
+  async (scanId: string, { rejectWithValue }) => {
+    try {
+      const reviewStatus = await scanService.rejectScan(scanId)
+      return { scanId, reviewStatus }
+    } catch (error) {
+      const axiosError = error as {
+        response?: { data?: { message?: string; detail?: string } }
+        message?: string
+      }
+      return rejectWithValue(
+        axiosError.response?.data?.detail ||
+          axiosError.response?.data?.message ||
+          axiosError.message ||
+          'Failed to reject analysis'
+      )
+    }
+  }
+)
+
 const scanSlice = createSlice({
   name: 'scan',
   initialState,
@@ -153,6 +174,20 @@ const scanSlice = createSlice({
         state.isLoading = false
         state.error = action.payload as string
       })
+
+    builder.addCase(rejectScanAnalysis.fulfilled, (state, action) => {
+      const { scanId, reviewStatus } = action.payload
+      const updateScan = (scan: ScanResult | null) => {
+        if (scan?.id === scanId) {
+          return { ...scan, reviewStatus }
+        }
+        return scan
+      }
+      state.currentScan = updateScan(state.currentScan)
+      state.scanHistory = state.scanHistory.map((scan) =>
+        scan.id === scanId ? { ...scan, reviewStatus } : scan
+      )
+    })
   },
 })
 

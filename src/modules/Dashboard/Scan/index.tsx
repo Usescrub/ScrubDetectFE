@@ -34,7 +34,6 @@ const fileTypeOptions = [
   { label: 'WEBP', value: '.webp' },
 ]
 
-const SUPPORTED_TYPES = ['pdf', 'docx', 'png', 'jpg', 'jpeg', 'webp']
 const MAX_FILE_SIZE = 10 * 1024 * 1024
 
 const Scan = () => {
@@ -48,7 +47,6 @@ const Scan = () => {
   const [isDragging, setIsDragging] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
-  const [fileType, setFileType] = useState<string>('.pdf')
 
   const [quota, setQuota] = useState<{
     scanAllowance: number
@@ -63,6 +61,7 @@ const Scan = () => {
     handleSubmit,
     formState: { errors },
     control,
+    watch,
   } = useForm<FormType>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -70,12 +69,23 @@ const Scan = () => {
     },
   })
 
+  const fileType = watch('fileType')
+  const canUpload = !!fileType
+
   useEffect(() => {
     if (scanError) {
       toast.error(scanError)
       dispatch(clearError())
     }
   }, [scanError, dispatch])
+
+  useEffect(() => {
+    setSelectedFile(null)
+    setError(null)
+    if (fileInputRef.current) {
+      fileInputRef.current.value = ''
+    }
+  }, [fileType])
 
   useEffect(() => {
     let cancelled = false
@@ -103,12 +113,15 @@ const Scan = () => {
   }
 
   const validateFile = (file: File): string | null => {
-    const fileExtension = file.name.split('.').pop()?.toLowerCase()
+    if (!fileType) {
+      return 'Please select a file type before uploading'
+    }
 
-    if (!fileExtension || !SUPPORTED_TYPES.includes(fileExtension)) {
-      return `File type .${fileExtension} is not supported. Supported types: ${SUPPORTED_TYPES.join(
-        ', '
-      ).toUpperCase()}`
+    const fileExtension = file.name.split('.').pop()?.toLowerCase()
+    const expectedExtension = fileType.replace('.', '').toLowerCase()
+
+    if (!fileExtension || fileExtension !== expectedExtension) {
+      return `Please upload a ${expectedExtension.toUpperCase()} file`
     }
 
     if (file.size > MAX_FILE_SIZE) {
@@ -136,6 +149,7 @@ const Scan = () => {
   const handleDragOver = (e: React.DragEvent) => {
     e.preventDefault()
     e.stopPropagation()
+    if (!canUpload) return
     setIsDragging(true)
   }
 
@@ -149,6 +163,10 @@ const Scan = () => {
     e.preventDefault()
     e.stopPropagation()
     setIsDragging(false)
+    if (!canUpload) {
+      setError('Please select a file type before uploading')
+      return
+    }
 
     const files = e.dataTransfer.files
     if (files && files.length > 0) {
@@ -164,6 +182,10 @@ const Scan = () => {
   }
 
   const handleUploadClick = () => {
+    if (!canUpload) {
+      setError('Please select a file type before uploading')
+      return
+    }
     fileInputRef.current?.click()
   }
 
@@ -186,7 +208,7 @@ const Scan = () => {
       await dispatch(
         scanDocument({
           file: selectedFile,
-          fileType: data.fileType || fileType,
+          fileType: data.fileType,
         })
       ).unwrap()
       toast.success('Document scanned successfully')
@@ -218,6 +240,9 @@ const Scan = () => {
     }
   }
 
+  const selectedTypeLabel =
+    fileTypeOptions.find((o) => o.value === fileType)?.label || fileType.replace('.', '').toUpperCase()
+
   return (
     <div className="w-full h-full flex flex-col">
       <h2 className="text-2xl font-semibold mb-6 text-[#0E1B28] dark:text-[#D7E4F1]">
@@ -248,7 +273,6 @@ const Scan = () => {
               </label>
               <Select
                 control={control}
-                onChange={setFileType}
                 classname="dark:bg-[#161616]"
                 name="fileType"
                 placeholder="Make Selection -- PDF, DOCX, PNG etc. --"
@@ -262,24 +286,27 @@ const Scan = () => {
             <div
               className={`
               relative border-2 border-dashed rounded-2xl p-12 mb-6
-              transition-colors cursor-pointer h-[500px] flex items-center justify-center
+              transition-colors h-[500px] flex items-center justify-center
               bg-[#FEFEFEF5]
               ${
-                isDragging
-                  ? 'border-[#FAD645] bg-[#FDF8EF] dark:bg-[#1a1a0a]'
-                  : 'border-[#E0E0E0] dark:border-[#333333] bg-[#F9F9FB] dark:bg-[#161616]'
+                !canUpload
+                  ? 'border-[#E0E0E0] dark:border-[#333333] bg-[#F5F5F5] dark:bg-[#141414] opacity-60 cursor-not-allowed'
+                  : isDragging
+                  ? 'border-[#FAD645] bg-[#FDF8EF] dark:bg-[#1a1a0a] cursor-pointer'
+                  : 'border-[#E0E0E0] dark:border-[#333333] bg-[#F9F9FB] dark:bg-[#161616] cursor-pointer'
               }
             `}
               onDragOver={handleDragOver}
               onDragLeave={handleDragLeave}
               onDrop={handleDrop}
-              onClick={handleUploadClick}
+              onClick={canUpload ? handleUploadClick : undefined}
             >
               <input
                 ref={fileInputRef}
                 type="file"
                 className="hidden"
-                accept={fileType}
+                accept={fileType || undefined}
+                disabled={!canUpload}
                 onChange={handleFileInputChange}
               />
 
@@ -289,14 +316,19 @@ const Scan = () => {
                 </div>
                 <div className="text-center">
                   <p className="text-2xl font-medium mb-2 text-[#0E1B28] dark:text-[#D7E4F1]">
-                    Drag & drop a file here
+                    {canUpload
+                      ? `Drag & drop a ${selectedTypeLabel} file here`
+                      : 'Select a file type first'}
                   </p>
                   <p className="text-sm text-[#82898F] dark:text-[#9CA3AF]">
-                    or click to browse
+                    {canUpload
+                      ? 'or click to browse'
+                      : 'Upload will unlock after you choose a type'}
                   </p>
                 </div>
                 <Button
-                  className="bg-[#FAD645] dark:text-black hover:bg-[#FAD645]/90 mt-2 [&&]:w-fit"
+                  className="bg-[#FAD645] dark:text-black hover:bg-[#FAD645]/90 mt-2 [&&]:w-fit disabled:opacity-50 disabled:cursor-not-allowed"
+                  disabled={!canUpload}
                   onClick={(e) => {
                     e.stopPropagation()
                     handleUploadClick()
@@ -338,8 +370,9 @@ const Scan = () => {
             <div className="flex items-start gap-3">
               <Warning2 className="w-5 h-5 text-[#DF9300] flex-shrink-0 mt-0.5" />
               <p className="text-sm text-[#0E1B28] dark:text-[#D7E4F1]">
-                Supported file types: PDF, JPG, JPEG, PNG, WEBP. Max file size:
-                10MB.
+                {canUpload
+                  ? `Selected type: ${selectedTypeLabel}. Max file size: 10MB.`
+                  : 'Supported file types: PDF, DOCX, JPG, JPEG, PNG, WEBP. Max file size: 10MB.'}
               </p>
             </div>
           </div>
