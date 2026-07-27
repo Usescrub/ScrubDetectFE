@@ -64,6 +64,53 @@ export interface UserStatusResponse {
   isVerified: boolean
 }
 
+export interface UpdateProfileRequest {
+  fullName?: string
+  phone?: string
+  role?: string
+  country?: string
+}
+
+export interface UpdateOrganisationRequest {
+  company?: string
+  companySize?: string
+  industry?: string
+}
+
+export interface TeamMember {
+  id: number
+  email: string
+  fullName?: string
+  role?: string
+  permissions: string[]
+  isOrgAdmin: boolean
+  isActive: boolean
+  isVerified: boolean
+  createdAt: string
+}
+
+export interface InviteTeamMemberRequest {
+  email: string
+  fullName: string
+  role?: string
+}
+
+export interface OrganisationEvent {
+  id: number
+  event: string
+  message: string
+  actor: string
+  createdAt: string
+  metadata?: Record<string, unknown>
+}
+
+export interface OrganisationEventListResponse {
+  items: OrganisationEvent[]
+  total: number
+  limit: number
+  offset: number
+}
+
 export const authService = {
   async login(credentials: LoginRequest): Promise<LoginResponse> {
     const response = await apiClient.post<LoginResponse>(
@@ -71,10 +118,6 @@ export const authService = {
       credentials
     )
     return response.data
-  },
-
-  async logout(): Promise<void> {
-    await apiClient.post(API_ENDPOINTS.AUTH.LOGOUT)
   },
 
   async refreshToken(refreshToken: string): Promise<RefreshTokenResponse> {
@@ -85,14 +128,67 @@ export const authService = {
     return response.data
   },
 
-  async getCurrentUser(): Promise<{
-    success: boolean
-    data: AuthenticatedUser
-  }> {
-    const response = await apiClient.get<{
-      success: boolean
-      data: AuthenticatedUser
-    }>(API_ENDPOINTS.AUTH.ME)
+  async getCurrentUser(): Promise<AuthenticatedUser> {
+    const response = await apiClient.get<AuthenticatedUser>(
+      API_ENDPOINTS.AUTH.ME
+    )
+    return response.data
+  },
+
+  async updateProfile(data: UpdateProfileRequest): Promise<AuthenticatedUser> {
+    const response = await apiClient.patch<AuthenticatedUser>(
+      API_ENDPOINTS.AUTH.ME,
+      data
+    )
+    return response.data
+  },
+
+  async updateOrganisation(
+    data: UpdateOrganisationRequest
+  ): Promise<AuthenticatedUser> {
+    const response = await apiClient.patch<AuthenticatedUser>(
+      API_ENDPOINTS.AUTH.ORGANISATION,
+      data
+    )
+    return response.data
+  },
+
+  async listTeam(): Promise<{ members: TeamMember[]; total: number }> {
+    const response = await apiClient.get<{ members: TeamMember[]; total: number }>(
+      API_ENDPOINTS.AUTH.TEAM
+    )
+    return response.data
+  },
+
+  async listOrganisationActivity(
+    limit = 50,
+    offset = 0
+  ): Promise<OrganisationEventListResponse> {
+    const response = await apiClient.get<OrganisationEventListResponse>(
+      API_ENDPOINTS.AUTH.ORGANISATION_ACTIVITY,
+      { params: { limit, offset } }
+    )
+    return response.data
+  },
+
+  async listOrganisationLogs(
+    limit = 50,
+    offset = 0
+  ): Promise<OrganisationEventListResponse> {
+    const response = await apiClient.get<OrganisationEventListResponse>(
+      API_ENDPOINTS.AUTH.ORGANISATION_LOGS,
+      { params: { limit, offset } }
+    )
+    return response.data
+  },
+
+  async inviteTeamMember(
+    data: InviteTeamMemberRequest
+  ): Promise<{ member: TeamMember; message: string }> {
+    const response = await apiClient.post<{ member: TeamMember; message: string }>(
+      API_ENDPOINTS.AUTH.TEAM_INVITE,
+      data
+    )
     return response.data
   },
 

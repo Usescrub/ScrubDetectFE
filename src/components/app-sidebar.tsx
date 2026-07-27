@@ -2,7 +2,7 @@ import * as React from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { toast } from 'sonner'
 import { useAppDispatch } from '@/redux/hooks'
-import { logoutAsync } from '@/redux/slices/authSlice'
+import { logout } from '@/redux/slices/authSlice'
 
 import {
   Sidebar,
@@ -26,6 +26,8 @@ import ScrubLogo from '@/assets/icons/scrubLogo.svg?react'
 import KeyIcon from '@/assets/icons/components/KeyIcon'
 import { cn } from '@/lib/utils'
 import { useLocation } from 'react-router-dom'
+import { useAppSelector } from '@/redux/hooks'
+import { TOOLBOX } from '@/constants/toolbox'
 
 const menuGrp = {
   1: [
@@ -38,6 +40,25 @@ const menuGrp = {
       title: 'Scan',
       icon: Guard,
       url: '/scan',
+      permission: TOOLBOX.DETECT_API,
+    },
+    {
+      title: 'Financial Reports',
+      icon: Guard,
+      url: '/financial-reports',
+      permission: TOOLBOX.CREDIT_REPORT,
+    },
+    {
+      title: 'Credit Scoring',
+      icon: Guard,
+      url: '/credit-scoring',
+      permission: TOOLBOX.CREDIT_SCORE,
+    },
+    {
+      title: 'Fraud Monitoring',
+      icon: Guard,
+      url: '/fraud-monitoring',
+      permission: TOOLBOX.FRAUD_MONITORING,
     },
   ],
   2: [
@@ -49,7 +70,7 @@ const menuGrp = {
     {
       title: 'Settings',
       icon: Cog,
-      url: '#',
+      url: '/settings',
     },
   ],
   3: [
@@ -66,16 +87,12 @@ const AppSidebar = ({ ...props }: React.ComponentProps<typeof Sidebar>) => {
   const { pathname } = useLocation()
   const dispatch = useAppDispatch()
   const navigate = useNavigate()
+  const toolbox = useAppSelector((s) => s.auth.user?.toolbox) || []
 
-  const handleLogout = async () => {
-    try {
-      await dispatch(logoutAsync()).unwrap()
-      toast.success('Logged out successfully')
-      navigate('/login')
-    } catch (error) {
-      toast.error('Failed to logout. Please try again.')
-      navigate('/login')
-    }
+  const handleLogout = () => {
+    dispatch(logout())
+    toast.success('Logged out successfully')
+    navigate('/login')
   }
 
   return (
@@ -93,7 +110,7 @@ const AppSidebar = ({ ...props }: React.ComponentProps<typeof Sidebar>) => {
         )}
       >
         <SidebarTrigger className="absolute right-[-10px] top-[30%] rounded-full cursor-pointer h-[25px] w-[25px] bg-[#FAD645] absolute"></SidebarTrigger>
-        <div className="text-white">
+        <div className="text-[#D7E4F1]">
           {state === 'collapsed' ? <ShortLogo /> : <ScrubLogo fill="white" />}
         </div>
         <Separator className="px-2 mt-5" />
@@ -116,7 +133,7 @@ const AppSidebar = ({ ...props }: React.ComponentProps<typeof Sidebar>) => {
                           <SidebarMenuButton
                             onClick={handleLogout}
                             size="lg"
-                            className="text-white cursor-pointer"
+                            className="text-[#D7E4F1] cursor-pointer"
                           >
                             <item.icon
                               width={25}
@@ -129,13 +146,20 @@ const AppSidebar = ({ ...props }: React.ComponentProps<typeof Sidebar>) => {
                       )
                     }
                     const IconComponent = item.icon
+                    const locked =
+                      'permission' in item &&
+                      item.permission &&
+                      !toolbox.includes(item.permission)
                     return (
                       <Link key={item.title} to={item.url}>
                         <SidebarMenuItem>
                           <SidebarMenuButton
                             isActive={pathname.includes(item.url)}
                             size="lg"
-                            className="text-white"
+                            className={cn(
+                              'text-[#D7E4F1]',
+                              locked && 'opacity-40'
+                            )}
                           >
                             <IconComponent
                               width={25}

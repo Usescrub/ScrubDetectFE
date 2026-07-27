@@ -101,7 +101,7 @@ const transformDetectionResponse = (
 export const scanService = {
   async scanDocument(
     file: File,
-    config: AxiosRequestConfig
+    config: AxiosRequestConfig = {}
   ): Promise<ScanResponse> {
     const formData = new FormData()
     formData.append('file', file)
@@ -120,7 +120,6 @@ export const scanService = {
 
     const transformedData = transformDetectionResponse(response.data)
 
-    console.log(transformedData)
     return {
       success: response.data.success,
       data: transformedData,
@@ -133,7 +132,6 @@ export const scanService = {
     )
 
     const transformedData = transformDetectionResponse(response.data)
-    console.log(transformedData)
 
     return {
       success: response.data.success,

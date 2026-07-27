@@ -108,7 +108,7 @@ export default function LoginPage() {
           />
           <div className="flex w-full justify-between my-5 gap-2.5">
             <Button className="bg-[#E9E9E9] dark:bg-[#232323] gap-2.5" path="">
-              <span className="font-medium text-black dark:text-white md:block hidden">
+              <span className="font-medium text-black dark:text-[#D7E4F1] md:block hidden">
                 Sign in with Google
               </span>
               <img src={googleIcon} alt="google-icon" width={24} height={24} />

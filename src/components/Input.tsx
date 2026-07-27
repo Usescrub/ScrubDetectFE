@@ -1,10 +1,9 @@
 import { useState } from 'react'
 import PhoneInput from 'react-phone-number-input'
 import { useController } from 'react-hook-form'
+import { EyeClosed, Eye } from 'lucide-react'
 
 import type { Control } from 'react-hook-form'
-
-import EyeIcon from '@/assets/icons/eye.svg?react'
 
 import 'react-phone-number-input/style.css'
 
@@ -47,7 +46,7 @@ export default function Input({
   return (
     <div className="mb-4 w-full relative">
       <div
-        className={`relative bg-[#F9F9FB] dark:bg-[#0D0D0D] flex rounded-full px-2.5 py-2 items-center gap-x-3 w-full ${classname}`}
+        className={`relative bg-[#F9F9FB] dark:bg-[#0D0D0D] flex rounded-full px-2.5 py-2 items-center gap-x-3 w-full transition-all duration-200 ease-out ${classname}`}
       >
         {Icon && (
           <div className="rounded-full w-11 h-11 bg-[#E8E8E9] dark:bg-[#222224] flex items-center justify-center">
@@ -61,7 +60,7 @@ export default function Input({
             value={field.value}
             onChange={field.onChange}
             defaultCountry="NG"
-            className="w-full input-phone-number my-phone-input-container"
+            className="w-full input-phone-number my-phone-input-container dark:text-[#D7E4F1] h-11 transition-all duration-200"
           />
         ) : (
           <input
@@ -70,7 +69,7 @@ export default function Input({
             onChange={field.onChange}
             defaultValue={defaultValue}
             placeholder={placeholder}
-            className={`py-2 h-full w-full focus:outline-none text-black focus-visible:outline-none bg-[#F9F9FB] dark:bg-[#0D0D0D] dark:text-white placeholder:text-light-grey ${phoneClass}`}
+            className={`py-2 h-full w-full focus:outline-none text-black focus-visible:outline-none bg-[#F9F9FB] dark:bg-[#0D0D0D] dark:text-[#D7E4F1] placeholder:text-light-grey transition-all duration-200 ${phoneClass}`}
           />
         )}
 
@@ -79,7 +78,7 @@ export default function Input({
             className="w-4.5 h-4.5 absolute right-4 cursor-pointer"
             onClick={() => setPasswordToggle(!passwordToggle)}
           >
-            <EyeIcon />
+            {passwordToggle ? <EyeClosed /> : <Eye />}
           </div>
         )}
       </div>

@@ -87,13 +87,15 @@ export default function Verification() {
         typeof error === 'string'
           ? error
           : (error as { response?: { data?: { message?: string } } })?.response
-              ?.data?.message ||
-            'Failed to resend verification email. Please try again.'
+            ?.data?.message ||
+          'Failed to resend verification email. Please try again.'
       toast.error(errorMessage)
     } finally {
       setIsResending(false)
     }
   }
+  const isResendingDisabled = isResending || isPolling || isActivated
+
   return (
     <UnauthenticatedLayout>
       <div className="max-w-[508px] w-full h-[425px] px-2">
@@ -130,7 +132,7 @@ export default function Verification() {
         <div>
           <div className="w-full flex flex-col justify-center items-center gap-5">
             <div className="w-full px-5 py-[1.5625rem] bg-[#F9F9FB] dark:bg-[#121212] rounded-[20px] flex flex-col gap-8">
-              <h3 className="font-medium leading-4.5 text-[#4C4C4C] dark:text-white">
+              <h3 className="font-medium leading-4.5 text-[#4C4C4C] dark:text-[#D7E4F1]">
                 What do you have to do after your Account Activation?
               </h3>
               <div className="flex flex-col gap-4">
@@ -154,9 +156,9 @@ export default function Verification() {
             </div>
             <div className="controls flex flex-col gap-3 w-full">
               <Button
-                className="bg-transparent text-yellow text-sm w-full"
-                onClick={handleResendVerification}
-                disabled={isResending}
+                className="bg-transparent text-yellow text-sm w-full focus:outline-none hover:text-green-200 disabled:text-gray-400 disabled:cursor-not-allowed"
+                onClick={!isResendingDisabled ? handleResendVerification : undefined}
+                disabled={isResendingDisabled}
               >
                 {isResending ? 'Sending...' : 'Resend Verification Email'}
               </Button>

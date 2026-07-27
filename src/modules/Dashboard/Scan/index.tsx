@@ -3,7 +3,6 @@ import { useForm } from 'react-hook-form'
 import { z } from 'zod'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { toast } from 'sonner'
-import { useNavigate } from 'react-router-dom'
 
 import { useAppDispatch, useAppSelector } from '@/redux/hooks'
 import { scanDocument, clearError } from '@/redux/slices/scanSlice'
@@ -15,9 +14,10 @@ import Button from '@/components/buttons/Button'
 import File from '@/assets/icons/file.svg?react'
 import Warning2 from '@/assets/icons/warning-2.svg?react'
 import TickCircle from '@/assets/icons/tick-circle.svg?react'
-import KeyIcon from '@/assets/icons/components/KeyIcon'
 
 import ScanResults from './ScanResults'
+import { usageService } from '@/services/usageService'
+import { PricingModal } from '@/components/PricingModal'
 
 const formSchema = z.object({
   fileType: z.string().min(1, 'Please select a file type'),
@@ -39,7 +39,6 @@ const MAX_FILE_SIZE = 10 * 1024 * 1024
 
 const Scan = () => {
   const dispatch = useAppDispatch()
-  const navigate = useNavigate()
   const {
     currentScan,
     isScanning,
@@ -49,17 +48,16 @@ const Scan = () => {
   const [isDragging, setIsDragging] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
-  const { tokens } = useAppSelector((state) => state.token)
   const [fileType, setFileType] = useState<string>('.pdf')
 
-  const hasApiKey = !!tokens.length
-
-  useEffect(() => {
-    if (scanError) {
-      toast.error(scanError)
-      dispatch(clearError())
-    }
-  }, [scanError, dispatch])
+  const [quota, setQuota] = useState<{
+    scanAllowance: number
+    scansUsed: number
+    scansRemaining: number
+    plan: string
+  } | null>(null)
+  const [loadingQuota, setLoadingQuota] = useState(true)
+  const [showPricing, setShowPricing] = useState(false)
 
   const {
     handleSubmit,
@@ -71,6 +69,34 @@ const Scan = () => {
       fileType: '',
     },
   })
+
+  useEffect(() => {
+    if (scanError) {
+      toast.error(scanError)
+      dispatch(clearError())
+    }
+  }, [scanError, dispatch])
+
+  useEffect(() => {
+    let cancelled = false
+    const fetchQuota = async () => {
+      try {
+        setLoadingQuota(true)
+        const data = await usageService.getQuota()
+        if (!cancelled) setQuota(data)
+      } catch {
+        if (!cancelled) {
+          setQuota({ scanAllowance: 0, scansUsed: 0, scansRemaining: 0, plan: 'none' })
+        }
+      } finally {
+        if (!cancelled) setLoadingQuota(false)
+      }
+    }
+    fetchQuota()
+    return () => {
+      cancelled = true
+    }
+  }, [])
 
   if (currentScan && currentScan.scanStatus === 'completed') {
     return <ScanResults />
@@ -141,9 +167,17 @@ const Scan = () => {
     fileInputRef.current?.click()
   }
 
+  const scansRemaining = quota?.scansRemaining ?? 0
+  const quotaExhausted = !loadingQuota && scansRemaining <= 0
+
   const onSubmit = async (data: FormType) => {
     if (!selectedFile) {
       setError('Please select a file to scan')
+      return
+    }
+
+    if (quotaExhausted) {
+      setShowPricing(true)
       return
     }
 
@@ -156,6 +190,15 @@ const Scan = () => {
         })
       ).unwrap()
       toast.success('Document scanned successfully')
+      setQuota((prev) =>
+        prev
+          ? {
+              ...prev,
+              scansUsed: prev.scansUsed + 1,
+              scansRemaining: Math.max(0, prev.scansRemaining - 1),
+            }
+          : prev
+      )
     } catch (err) {
       const errorMessage =
         typeof err === 'string'
@@ -181,29 +224,18 @@ const Scan = () => {
         Scan a Document
       </h2>
 
-      {!hasApiKey && (
-        <div className="mb-6 p-4 bg-[#FDEDED] dark:bg-[#2a1a1a] rounded-lg border border-[#E31E18]">
-          <div className="flex items-start gap-3">
-            <Warning2 className="w-5 h-5 text-[#E31E18] flex-shrink-0 mt-0.5" />
-            <div className="flex-1">
-              <p className="text-sm font-semibold text-[#E31E18] mb-1">
-                API Key Required
-              </p>
-              <p className="text-sm text-[#0E1B28] dark:text-[#D7E4F1] mb-3">
-                You need an API key to scan documents. Please create a token to
-                get your API key and enable scanning functionality.
-              </p>
-              <Button
-                className="bg-[#E31E18] hover:bg-[#E31E18]/90 text-white text-sm px-4 py-2 [&&]:w-fit [&&]:h-[30px]"
-                onClick={() => navigate('/token-management')}
-              >
-                <span className="flex items-center gap-2">
-                  <KeyIcon />
-                  Get Token
-                </span>
-              </Button>
-            </div>
-          </div>
+      {quotaExhausted && (
+        <div className="mb-4 p-4 bg-[#FDEDED] dark:bg-[#2a1a1a] rounded-lg border border-[#E31E18]">
+          <p className="text-sm text-[#E31E18]">
+            You have used all your scans for this month.{' '}
+            <button
+              onClick={() => setShowPricing(true)}
+              className="underline font-semibold"
+            >
+              Upgrade your plan
+            </button>{' '}
+            to continue scanning.
+          </p>
         </div>
       )}
 
@@ -325,7 +357,7 @@ const Scan = () => {
             <Button
               className="bg-[#FAD645] dark:text-black hover:bg-[#FAD645]/90 [&&]:w-fit [&&}:text-sm [&&]:px-2 [&&]:h-[24px]"
               onClick={handleSubmit(onSubmit)}
-              disabled={isScanning || !selectedFile || !hasApiKey}
+              disabled={isScanning || !selectedFile || quotaExhausted}
             >
               <span className="flex items-center text-sm gap-2">
                 <TickCircle className="w-5 h-5" />
@@ -335,6 +367,12 @@ const Scan = () => {
           </div>
         </CardContent>
       </Card>
+
+      <PricingModal
+        isOpen={showPricing}
+        onClose={() => setShowPricing(false)}
+        currentPlan={quota?.plan ?? 'free'}
+      />
     </div>
   )
 }

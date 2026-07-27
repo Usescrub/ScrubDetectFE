@@ -13,9 +13,21 @@ import VerifyEmail from './modules/Auth/VerifyEmail'
 import Dashboard from './modules/Dashboard'
 import Scan from './modules/Dashboard/Scan'
 import TokenManagement from './modules/Dashboard/TokenManagement'
+import FinancialReports from './modules/Dashboard/FinancialReports'
+import ReportDetail from './modules/Dashboard/FinancialReports/ReportDetail'
+import CreditScoring from './modules/Dashboard/CreditScoring'
+import FraudMonitoring from './modules/Dashboard/FraudMonitoring'
+import Settings from './modules/Dashboard/Settings'
+import ConsentPage from './modules/Consent/ConsentPage'
 import { PublicRoute } from './components/PublicRoutes'
+import RequirePermission from './components/RequirePermission'
+import { TOOLBOX } from './constants/toolbox'
 
 const router = createBrowserRouter([
+  {
+    path: '/consent/:consentToken',
+    element: <ConsentPage />,
+  },
   {
     path: '/',
     element: <PublicRoute />,
@@ -58,8 +70,48 @@ const router = createBrowserRouter([
     ),
     children: [
       { path: 'dashboard', element: <Dashboard /> },
-      { path: 'scan', element: <Scan /> },
+      {
+        path: 'scan',
+        element: (
+          <RequirePermission permission={TOOLBOX.DETECT_API}>
+            <Scan />
+          </RequirePermission>
+        ),
+      },
       { path: 'token-management', element: <TokenManagement /> },
+      { path: 'settings', element: <Settings /> },
+      {
+        path: 'financial-reports',
+        element: (
+          <RequirePermission permission={TOOLBOX.CREDIT_REPORT}>
+            <FinancialReports />
+          </RequirePermission>
+        ),
+      },
+      {
+        path: 'financial-reports/:caseId',
+        element: (
+          <RequirePermission permission={TOOLBOX.CREDIT_REPORT}>
+            <ReportDetail />
+          </RequirePermission>
+        ),
+      },
+      {
+        path: 'credit-scoring',
+        element: (
+          <RequirePermission permission={TOOLBOX.CREDIT_SCORE}>
+            <CreditScoring />
+          </RequirePermission>
+        ),
+      },
+      {
+        path: 'fraud-monitoring',
+        element: (
+          <RequirePermission permission={TOOLBOX.FRAUD_MONITORING}>
+            <FraudMonitoring />
+          </RequirePermission>
+        ),
+      },
     ],
   },
 ])

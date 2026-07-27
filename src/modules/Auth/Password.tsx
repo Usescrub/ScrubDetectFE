@@ -63,29 +63,33 @@ export default function Password({ title }: PasswordProps) {
         return
       }
 
+      const email = signupData.email
+
       await authService.createPassword({
         new_password: data.password,
       })
-
-      dispatch(clearSignupData())
 
       toast.success('Password created successfully. Logging you in...')
 
       await dispatch(
         login({
-          email: signupData.email!,
+          email,
           password: data.password,
         })
       ).unwrap()
 
+      dispatch(clearSignupData())
       toast.success('Logged in successfully')
       navigate('/dashboard')
     } catch (error) {
       const errorMessage =
         typeof error === 'string'
           ? error
-          : (error as { response?: { data?: { message?: string } } })?.response
-              ?.data?.message || 'Failed to create password. Please try again.'
+          : (error as { response?: { data?: { detail?: string; message?: string } } })
+              ?.response?.data?.detail ||
+            (error as { response?: { data?: { message?: string } } })?.response
+              ?.data?.message ||
+            'Failed to create password. Please try again.'
       toast.error(errorMessage)
     }
   }

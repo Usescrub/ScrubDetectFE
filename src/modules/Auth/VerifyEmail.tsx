@@ -34,7 +34,7 @@ export default function VerifyEmail() {
           typeof err === 'string'
             ? err
             : (err as { response?: { data?: { message?: string } } })?.response
-                ?.data?.message || 'Failed to verify email. Please try again.'
+              ?.data?.message || 'Failed to verify email. Please try again.'
         setError(errorMessage)
         setStatus('error')
         toast.error(errorMessage)
@@ -53,8 +53,8 @@ export default function VerifyEmail() {
             {status === 'loading'
               ? 'Verifying your email address...'
               : status === 'success'
-              ? 'Your email has been successfully verified!'
-              : 'There was an issue verifying your email.'}
+                ? 'Your email has been successfully verified!'
+                : 'There was an issue verifying your email.'}
           </p>
         </div>
 
@@ -102,7 +102,7 @@ export default function VerifyEmail() {
                   Go to Login
                 </Button>
                 <Button
-                  className="bg-yellow dark:text-black"
+                  className="bg-yellow dark:text-black focus:outline-none"
                   onClick={() => navigate('/signup/verification')}
                 >
                   Resend Verification

@@ -8,7 +8,6 @@ import {
   type ScanResult,
   type ScanRequest,
 } from '@/services/scanService'
-import type { RootState } from '../store'
 
 export interface ScanState {
   currentScan: ScanResult | null
@@ -28,15 +27,9 @@ const initialState: ScanState = {
 
 export const scanDocument = createAsyncThunk(
   'scan/scanDocument',
-  async ({ file }: ScanRequest, { rejectWithValue, getState }) => {
-    const { tokens } = (getState() as RootState).token
-    const config = {
-      headers: {
-        'X-API-Key': tokens[0].key,
-      },
-    }
+  async ({ file }: ScanRequest, { rejectWithValue }) => {
     try {
-      const response = await scanService.scanDocument(file, config)
+      const response = await scanService.scanDocument(file)
       return response.data
     } catch (error) {
       const axiosError = error as {

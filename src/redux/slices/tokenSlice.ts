@@ -5,6 +5,7 @@ import {
 } from '@reduxjs/toolkit'
 import type { Token } from '@/services/tokenService'
 import { tokenService } from '@/services/tokenService'
+import type { ToolboxItem } from '@/constants/toolbox'
 
 interface InitialState {
   tokens: Token[]
@@ -34,12 +35,20 @@ export const fetchTokens = createAsyncThunk(
 
 export const createToken = createAsyncThunk(
   'token/createToken',
-  async (name: string, { rejectWithValue }) => {
+  async (
+    payload: { name: string; scopes: ToolboxItem[] },
+    { rejectWithValue }
+  ) => {
     try {
-      const response = await tokenService.createToken({ name })
+      const response = await tokenService.createToken(payload)
       return response
     } catch (error) {
-      return rejectWithValue(error.message)
+      return rejectWithValue(
+        (error as { response?: { data?: { detail?: string }; message?: string } })
+          .response?.data?.detail ||
+          (error as { message?: string }).message ||
+          'Failed to create token'
+      )
     }
   }
 )

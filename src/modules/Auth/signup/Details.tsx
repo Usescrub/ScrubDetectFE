@@ -221,7 +221,7 @@ export default function Details() {
           <Select
             name="country"
             options={countryOptions}
-            classname="dark:text-white"
+            classname="dark:text-[#D7E4F1]"
             placeholder="Select your country"
             icon={FlagIcon}
             control={control}

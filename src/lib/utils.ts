@@ -5,56 +5,36 @@ export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs))
 }
 
-function toCamelCase(str: string): string {
-  return str.replace(/_([a-z])/g, (_, letter) => letter.toUpperCase())
+export function getInitials(name?: string | null, email?: string): string {
+  if (!name && !email) return '?'
+  const source = (name || email || '').trim()
+  const parts = source.split(/\s+/)
+  if (parts.length >= 2) {
+    return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase()
+  }
+  return source.slice(0, 2).toUpperCase()
 }
 
-function toSnakeCase(str: string): string {
-  return str.replace(/[A-Z]/g, (letter) => `_${letter.toLowerCase()}`)
+export function camelToSnake<T>(obj: T): T {
+  if (obj === null || typeof obj !== 'object') return obj
+  if (Array.isArray(obj)) return obj.map(camelToSnake) as T
+
+  return Object.fromEntries(
+    Object.entries(obj as Record<string, unknown>).map(([key, value]) => {
+      const snakeKey = key.replace(/[A-Z]/g, (letter) => `_${letter.toLowerCase()}`)
+      return [snakeKey, camelToSnake(value)]
+    })
+  ) as T
 }
 
-export function snakeToCamel<T = unknown>(obj: unknown): T {
-  if (obj === null || obj === undefined) {
-    return obj as T
-  }
+export function snakeToCamel<T>(obj: T): T {
+  if (obj === null || typeof obj !== 'object') return obj
+  if (Array.isArray(obj)) return obj.map(snakeToCamel) as T
 
-  if (Array.isArray(obj)) {
-    return obj.map((item) => snakeToCamel(item)) as T
-  }
-
-  if (typeof obj === 'object' && obj.constructor === Object) {
-    const camelObj: Record<string, unknown> = {}
-    for (const key in obj) {
-      if (Object.prototype.hasOwnProperty.call(obj, key)) {
-        const camelKey = toCamelCase(key)
-        camelObj[camelKey] = snakeToCamel((obj as Record<string, unknown>)[key])
-      }
-    }
-    return camelObj as T
-  }
-
-  return obj as T
-}
-
-export function camelToSnake<T = unknown>(obj: unknown): T {
-  if (obj === null || obj === undefined) {
-    return obj as T
-  }
-
-  if (Array.isArray(obj)) {
-    return obj.map((item) => camelToSnake(item)) as T
-  }
-
-  if (typeof obj === 'object' && obj.constructor === Object) {
-    const snakeObj: Record<string, unknown> = {}
-    for (const key in obj) {
-      if (Object.prototype.hasOwnProperty.call(obj, key)) {
-        const snakeKey = toSnakeCase(key)
-        snakeObj[snakeKey] = camelToSnake((obj as Record<string, unknown>)[key])
-      }
-    }
-    return snakeObj as T
-  }
-
-  return obj as T
+  return Object.fromEntries(
+    Object.entries(obj as Record<string, unknown>).map(([key, value]) => {
+      const camelKey = key.replace(/_([a-z])/g, (_, letter) => letter.toUpperCase())
+      return [camelKey, snakeToCamel(value)]
+    })
+  ) as T
 }

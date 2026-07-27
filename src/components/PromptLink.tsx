@@ -14,7 +14,7 @@ export default function PromptLink({
   return (
     <span className="text-[0.75rem] text-light-grey">
       {prompt}&nbsp;
-      <span className="underline font-medium text-black dark:text-white">
+      <span className="underline font-medium text-black dark:text-[#D7E4F1]">
         <Link to={path}>{action}</Link>
       </span>
     </span>

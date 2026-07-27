@@ -1,20 +1,24 @@
 import apiClient from './api'
 import { API_ENDPOINTS } from './config'
+import type { ToolboxItem } from '@/constants/toolbox'
 
 export interface Token {
   id: string
   name: string
   key: string
+  scopes: ToolboxItem[]
   createdAt: string
   lastUsedAt?: string
+  isEnabled?: boolean
 }
 
 export interface CreateTokenRequest {
   name: string
+  scopes: ToolboxItem[]
 }
 
 export interface CreateTokenResponse {
-  success: boolean
+  success?: boolean
   token: Token
   message?: string
 }

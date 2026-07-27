@@ -11,10 +11,26 @@ import { authService, type LoginRequest } from '@/services/authService'
 import type { RootState } from '../store'
 
 export interface AuthenticatedUser {
-  id: string
+  id: string | number
   email: string
   name?: string
+  username?: string
+  fullName?: string
+  phone?: string
+  company?: string
+  companySize?: string
+  industry?: string
+  role?: string
+  country?: string
   roles?: string[]
+  permissions?: string[]
+  toolbox?: string[]
+  organisationId?: string
+  isOrgAdmin?: boolean
+  isActive?: boolean
+  isVerified?: boolean
+  createdAt?: string
+  lastLoginAt?: string
 }
 
 export interface SignupData {
@@ -57,20 +73,11 @@ export const login = createAsyncThunk(
   }
 )
 
-export const logoutAsync = createAsyncThunk('auth/logout', async () => {
-  try {
-    await authService.logout()
-  } catch (error) {
-    console.error('Logout API call failed:', error)
-  }
-})
-
 export const getCurrentUser = createAsyncThunk(
   'auth/getCurrentUser',
   async (_, { rejectWithValue }) => {
     try {
-      const response = await authService.getCurrentUser()
-      return response.data
+      return await authService.getCurrentUser()
     } catch (error) {
       return rejectWithValue(
         (error as { response?: { data?: { message?: string } } }).response?.data
@@ -121,6 +128,7 @@ const authSlice = createSlice({
       state.isAuthenticated = false
       state.user = null
       localStorage.removeItem(ACCESS_TOKEN_KEY)
+      localStorage.removeItem(REFRESH_TOKEN_KEY)
     },
     setUser(state, action: PayloadAction<AuthenticatedUser | null>) {
       state.user = action.payload
@@ -131,7 +139,7 @@ const authSlice = createSlice({
     },
     clearSignupData(state) {
       state.signupData = {}
-      localStorage.clearItem(SIGNUP_ACCESS_TOKEN_KEY)
+      localStorage.removeItem(SIGNUP_ACCESS_TOKEN_KEY)
     },
   },
   extraReducers: (builder) => {
@@ -147,20 +155,6 @@ const authSlice = createSlice({
       .addCase(login.rejected, (state) => {
         state.isAuthenticated = false
         state.user = null
-      })
-
-    builder
-      .addCase(logoutAsync.fulfilled, (state) => {
-        state.isAuthenticated = false
-        state.user = null
-        localStorage.removeItem(ACCESS_TOKEN_KEY)
-        localStorage.removeItem(REFRESH_TOKEN_KEY)
-      })
-      .addCase(logoutAsync.rejected, (state) => {
-        state.isAuthenticated = false
-        state.user = null
-        localStorage.removeItem(ACCESS_TOKEN_KEY)
-        localStorage.removeItem(REFRESH_TOKEN_KEY)
       })
 
     builder
@@ -183,7 +177,7 @@ const authSlice = createSlice({
           action.payload.accessToken
         )
       })
-      .addCase(signup.rejected, () => {})
+      .addCase(signup.rejected, () => { })
   },
 })
 

@@ -133,6 +133,74 @@
   --color-dark: #0d0d0d;
 }
 
+@layer base {
+  html {
+    scroll-behavior: smooth;
+  }
+}
+
+@layer utilities {
+  .animate-in {
+    animation-duration: 0.3s;
+    animation-fill-mode: both;
+  }
+  .fade-in {
+    animation-name: fadeIn;
+  }
+  .slide-in-from-bottom-3 {
+    animation-name: slideInBottom;
+  }
+  .slide-in-from-top-2 {
+    animation-name: slideInTop;
+  }
+  .animate-plan-border-pulse {
+    animation: plan-border-pulse 2.2s ease-in-out infinite;
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes slideInBottom {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slideInTop {
+  from {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes plan-border-pulse {
+  0%,
+  100% {
+    border-color: rgb(250 214 69 / 0.4);
+    box-shadow: 0 0 0 0 rgb(250 214 69 / 0);
+  }
+  50% {
+    border-color: rgb(250 214 69 / 1);
+    box-shadow: 0 0 0 4px rgb(250 214 69 / 0.28);
+  }
+}
+
 /*  phoneinput css styles */
 .input-phone-number input:focus {
   outline: none !important;
