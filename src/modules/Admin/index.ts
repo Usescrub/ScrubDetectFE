@@ -1,0 +1,6 @@
+export { default as AdminLayout } from './AdminLayout'
+export { default as AdminDashboard } from './Dashboard'
+export { default as UsersManagement } from './Users'
+export { default as OrganisationsManagement } from './Organisations'
+export { default as PlansManagement } from './Plans'
+export { default as ActivityLogs } from './Logs'

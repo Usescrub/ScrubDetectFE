@@ -21,6 +21,15 @@ import Settings from './modules/Dashboard/Settings'
 import ConsentPage from './modules/Consent/ConsentPage'
 import { PublicRoute } from './components/PublicRoutes'
 import RequirePermission from './components/RequirePermission'
+import RequireAdmin from './components/RequireAdmin'
+import {
+  AdminLayout,
+  AdminDashboard,
+  UsersManagement,
+  OrganisationsManagement,
+  PlansManagement,
+  ActivityLogs,
+} from './modules/Admin'
 import { TOOLBOX } from './constants/toolbox'
 
 const router = createBrowserRouter([
@@ -112,6 +121,23 @@ const router = createBrowserRouter([
           </RequirePermission>
         ),
       },
+    ],
+  },
+  {
+    path: '/admin',
+    element: (
+      <PrivateRoute>
+        <RequireAdmin>
+          <AdminLayout />
+        </RequireAdmin>
+      </PrivateRoute>
+    ),
+    children: [
+      { index: true, element: <AdminDashboard /> },
+      { path: 'users', element: <UsersManagement /> },
+      { path: 'organisations', element: <OrganisationsManagement /> },
+      { path: 'plans', element: <PlansManagement /> },
+      { path: 'logs', element: <ActivityLogs /> },
     ],
   },
 ])

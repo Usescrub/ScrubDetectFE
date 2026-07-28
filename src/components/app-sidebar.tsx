@@ -1,7 +1,8 @@
 import * as React from 'react'
-import { Link, useNavigate } from 'react-router-dom'
+import { Link, useNavigate, useLocation } from 'react-router-dom'
 import { toast } from 'sonner'
-import { useAppDispatch } from '@/redux/hooks'
+import { FileText, Gauge, ShieldAlert, ShieldCheck } from 'lucide-react'
+import { useAppDispatch, useAppSelector } from '@/redux/hooks'
 import { logout } from '@/redux/slices/authSlice'
 
 import {
@@ -25,8 +26,6 @@ import ShortLogo from '@/assets/icons/shortlogo.svg?react'
 import ScrubLogo from '@/assets/icons/scrubLogo.svg?react'
 import KeyIcon from '@/assets/icons/components/KeyIcon'
 import { cn } from '@/lib/utils'
-import { useLocation } from 'react-router-dom'
-import { useAppSelector } from '@/redux/hooks'
 import { TOOLBOX } from '@/constants/toolbox'
 
 const menuGrp = {
@@ -44,19 +43,19 @@ const menuGrp = {
     },
     {
       title: 'Financial Reports',
-      icon: Guard,
+      icon: FileText,
       url: '/financial-reports',
       permission: TOOLBOX.CREDIT_REPORT,
     },
     {
       title: 'Credit Scoring',
-      icon: Guard,
+      icon: Gauge,
       url: '/credit-scoring',
       permission: TOOLBOX.CREDIT_SCORE,
     },
     {
       title: 'Fraud Monitoring',
-      icon: Guard,
+      icon: ShieldAlert,
       url: '/fraud-monitoring',
       permission: TOOLBOX.FRAUD_MONITORING,
     },
@@ -87,7 +86,24 @@ const AppSidebar = ({ ...props }: React.ComponentProps<typeof Sidebar>) => {
   const { pathname } = useLocation()
   const dispatch = useAppDispatch()
   const navigate = useNavigate()
-  const toolbox = useAppSelector((s) => s.auth.user?.toolbox) || []
+  const user = useAppSelector((s) => s.auth.user)
+  const toolbox = user?.toolbox || []
+  const isSuperadmin = !!user?.isSuperadmin
+
+  const groups = React.useMemo(() => {
+    const items = { ...menuGrp }
+    if (isSuperadmin) {
+      items[2] = [
+        {
+          title: 'Admin',
+          icon: ShieldCheck,
+          url: '/admin',
+        },
+        ...items[2],
+      ]
+    }
+    return items
+  }, [isSuperadmin])
 
   const handleLogout = () => {
     dispatch(logout())
@@ -121,7 +137,7 @@ const AppSidebar = ({ ...props }: React.ComponentProps<typeof Sidebar>) => {
           state === 'collapsed' && 'px-2'
         )}
       >
-        {Object.values(menuGrp).map((v, index) => {
+        {Object.values(groups).map((v, index) => {
           return (
             <React.Fragment key={index}>
               <SidebarGroup>
@@ -174,7 +190,7 @@ const AppSidebar = ({ ...props }: React.ComponentProps<typeof Sidebar>) => {
                   })}
                 </SidebarMenu>
               </SidebarGroup>
-              {!(index === Object.values(menuGrp).length - 1) && (
+              {!(index === Object.values(groups).length - 1) && (
                 <Separator className="px-2 mt-5" />
               )}
             </React.Fragment>

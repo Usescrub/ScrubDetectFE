@@ -27,6 +27,7 @@ export interface AuthenticatedUser {
   toolbox?: string[]
   organisationId?: string
   isOrgAdmin?: boolean
+  isSuperadmin?: boolean
   isActive?: boolean
   isVerified?: boolean
   createdAt?: string

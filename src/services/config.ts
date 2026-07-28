@@ -44,4 +44,14 @@ export const API_ENDPOINTS = {
   USAGE: {
     QUOTA: '/api/v1/usage/quota',
   },
+  ADMIN: {
+    USERS: '/api/v1/admin/users',
+    USER: (id: string | number) => `/api/v1/admin/users/${id}`,
+    ORGANISATIONS: '/api/v1/admin/organisations',
+    ORGANISATION: (id: string | number) => `/api/v1/admin/organisations/${id}`,
+    PLANS: '/api/v1/admin/plans',
+    PLAN: (id: string | number) => `/api/v1/admin/plans/${id}`,
+    LOGS: '/api/v1/admin/logs',
+    STATS: '/api/v1/admin/stats',
+  },
 } as const
