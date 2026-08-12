@@ -5,6 +5,8 @@ import { useAppDispatch, useAppSelector } from '@/redux/hooks'
 import { logout } from '@/redux/slices/authSlice'
 import { cn, getInitials } from '@/lib/utils'
 import ThemeSwitcher from '@/components/ThemeSwitcher'
+import SandboxModeToggle from '@/components/SandboxModeToggle'
+import SandboxBanner from '@/components/SandboxBanner'
 import { Separator } from '@/components/ui/separator'
 
 import ScrubLogo from '@/assets/icons/scrubLogo.svg?react'
@@ -86,6 +88,7 @@ export default function AdminLayout() {
       </aside>
 
       <div className="flex-1 flex flex-col min-w-0">
+        <SandboxBanner />
         <header className="flex justify-between items-center px-6 py-4">
           <div>
             <h1 className="text-2xl font-semibold text-[#0E1B28] dark:text-[#D7E4F1]">
@@ -94,6 +97,7 @@ export default function AdminLayout() {
             <p className="text-sm text-[#82898F]">Platform management</p>
           </div>
           <div className="flex gap-x-5 items-center">
+            <SandboxModeToggle />
             <ThemeSwitcher />
             <div className="flex justify-center items-center rounded-full h-[40px] w-[40px] bg-[#FAD645] text-[#0E1B28] font-semibold text-sm">
               {initials}

@@ -9,6 +9,7 @@ import {
   deleteToken,
   fetchTokens,
 } from '@/redux/slices/tokenSlice'
+import type { ApiEnvironment } from '@/redux/slices/environmentSlice'
 import {
   ALL_TOOLBOX,
   TOOLBOX_LABELS,
@@ -41,10 +42,14 @@ type FormType = z.infer<typeof formSchema>
 const TokenManagement = () => {
   const dispatch = useAppDispatch()
   const { tokens, isLoading } = useAppSelector((state) => state.token)
+  const globalMode = useAppSelector((state) => state.environment.mode)
+  const liveEnabled = !!useAppSelector((state) => state.auth.user?.liveEnabled)
   const orgToolbox = (useAppSelector((state) => state.auth.user?.toolbox) ||
     []) as ToolboxItem[]
   const [showCreateDialog, setShowCreateDialog] = useState(false)
   const [selectedScopes, setSelectedScopes] = useState<ToolboxItem[]>([])
+  const [tokenEnvironment, setTokenEnvironment] =
+    useState<ApiEnvironment>(globalMode)
 
   const {
     control,
@@ -65,8 +70,11 @@ const TokenManagement = () => {
   useEffect(() => {
     if (showCreateDialog) {
       setSelectedScopes(orgToolbox.filter((p) => ALL_TOOLBOX.includes(p)))
+      const nextEnv =
+        globalMode === 'live' && !liveEnabled ? 'sandbox' : globalMode
+      setTokenEnvironment(nextEnv)
     }
-  }, [showCreateDialog, orgToolbox])
+  }, [showCreateDialog, orgToolbox, globalMode, liveEnabled])
 
   const toggleScope = (permission: ToolboxItem, available: boolean) => {
     if (!available) return
@@ -86,12 +94,17 @@ const TokenManagement = () => {
     }
     try {
       await dispatch(
-        createToken({ name: data.name, scopes: selectedScopes })
+        createToken({
+          name: data.name,
+          scopes: selectedScopes,
+          environment: tokenEnvironment,
+        })
       ).unwrap()
       toast.success('Token created')
       setShowCreateDialog(false)
       reset()
       setSelectedScopes([])
+      setTokenEnvironment(globalMode)
     } catch (error) {
       toast.error(typeof error === 'string' ? error : 'Failed to create token')
     }
@@ -163,9 +176,21 @@ const TokenManagement = () => {
                 >
                   <div className="flex justify-between items-start">
                     <div className="flex-1">
-                      <h3 className="font-semibold text-[#0E1B28] dark:text-[#D7E4F1] mb-2">
-                        {token.name}
-                      </h3>
+                      <div className="flex items-center gap-2 mb-2">
+                        <h3 className="font-semibold text-[#0E1B28] dark:text-[#D7E4F1]">
+                          {token.name}
+                        </h3>
+                        <span
+                          className={cn(
+                            'text-xs px-2 py-0.5 rounded capitalize',
+                            token.environment === 'live'
+                              ? 'bg-[#E8F5E9] text-[#2E7D32] dark:bg-[#1a2e1a] dark:text-[#81C784]'
+                              : 'bg-[#FFF8E1] text-[#F57F17] dark:bg-[#2e2a1a] dark:text-[#FFD54F]'
+                          )}
+                        >
+                          {token.environment || 'live'}
+                        </span>
+                      </div>
                       <div className="flex flex-wrap gap-2 mb-2">
                         {(token.scopes || []).map((scope) => (
                           <span
@@ -240,6 +265,27 @@ const TokenManagement = () => {
                 error={errors.name?.message}
                 classname="w-full"
               />
+              <div className="space-y-2">
+                <label
+                  htmlFor="token-environment"
+                  className="text-sm font-medium text-[#0E1B28] dark:text-[#D7E4F1]"
+                >
+                  Environment
+                </label>
+                <select
+                  id="token-environment"
+                  value={tokenEnvironment}
+                  onChange={(e) =>
+                    setTokenEnvironment(e.target.value as ApiEnvironment)
+                  }
+                  className="w-full h-10 rounded-lg border border-[#E0E0E0] dark:border-[#333333] bg-white dark:bg-[#161616] px-3 text-sm text-[#0E1B28] dark:text-[#D7E4F1]"
+                >
+                  <option value="sandbox">Sandbox</option>
+                  <option value="live" disabled={!liveEnabled}>
+                    Live{!liveEnabled ? ' (not approved)' : ''}
+                  </option>
+                </select>
+              </div>
               <div className="space-y-3">
                 <p className="text-sm font-medium text-[#0E1B28] dark:text-[#D7E4F1]">
                   Scopes

@@ -51,7 +51,7 @@ export default function JoinUs() {
       updateSignupData({
         firstName: data.firstName,
         lastName: data.lastName,
-        email: data.email,
+        email: data.email.trim().toLowerCase(),
         phone: data.phone,
       })
     )

@@ -10,6 +10,10 @@ export const API_ENDPOINTS = {
     REFRESH: '/api/v1/auth/refresh',
     ME: '/api/v1/auth/me',
     ORGANISATION: '/api/v1/auth/organisation',
+    ORGANISATION_CONTROLS: '/api/v1/auth/organisation/controls',
+    ORGANISATION_WEBHOOK_SECRET_ROTATE:
+      '/api/v1/auth/organisation/controls/webhook-secret/rotate',
+    ORGANISATION_WEBHOOK_TEST: '/api/v1/auth/organisation/controls/webhook-test',
     ORGANISATION_ACTIVITY: '/api/v1/auth/organisation/activity',
     ORGANISATION_LOGS: '/api/v1/auth/organisation/logs',
     TEAM: '/api/v1/auth/team',
@@ -38,6 +42,7 @@ export const API_ENDPOINTS = {
     GET: (id: string) => `/api/v1/report/${id}`,
   },
   CONSENT: {
+    SESSION: (token: string) => `/c/${token}/session`,
     LINK_TOKEN: (token: string) => `/c/${token}/link-token`,
     EXCHANGE: (token: string) => `/c/${token}/exchange`,
   },

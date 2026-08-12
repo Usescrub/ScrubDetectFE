@@ -19,6 +19,7 @@ import CreditScoring from './modules/Dashboard/CreditScoring'
 import FraudMonitoring from './modules/Dashboard/FraudMonitoring'
 import Settings from './modules/Dashboard/Settings'
 import ConsentPage from './modules/Consent/ConsentPage'
+import PlaidLinkFrame from './modules/PlaidLink/PlaidLinkFrame'
 import { PublicRoute } from './components/PublicRoutes'
 import RequirePermission from './components/RequirePermission'
 import RequireAdmin from './components/RequireAdmin'
@@ -36,6 +37,10 @@ const router = createBrowserRouter([
   {
     path: '/consent/:consentToken',
     element: <ConsentPage />,
+  },
+  {
+    path: '/plaid/link',
+    element: <PlaidLinkFrame />,
   },
   {
     path: '/',

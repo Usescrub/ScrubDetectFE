@@ -60,7 +60,10 @@ export default function LoginPage() {
   const onSubmit = async (data: FormType) => {
     try {
       await dispatch(
-        login({ email: data.email, password: data.password })
+        login({
+          email: data.email.trim().toLowerCase(),
+          password: data.password,
+        })
       ).unwrap()
       toast.success('Login successful')
     } catch (error) {

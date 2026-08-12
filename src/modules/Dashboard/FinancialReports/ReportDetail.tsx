@@ -21,7 +21,7 @@ const statusStyles: Record<CaseStatus, string> = {
   PENDING_CONNECTION: 'bg-[#FDF8EF] text-[#DF9300]',
   CONNECTED: 'bg-[#FDF8EF] text-[#DF9300]',
   PROCESSING: 'bg-[#FDF8EF] text-[#DF9300]',
-  COMPLETED: 'bg-[#EBFAF5] text-[#0CB95B]',
+  REPORT_READY: 'bg-[#EBFAF5] text-[#0CB95B]',
   FAILED: 'bg-[#FDEDED] text-[#E31E18]',
   EXPIRED: 'bg-[#FDEDED] text-[#E31E18]',
 }
@@ -86,9 +86,6 @@ const ReportDetail = () => {
           <h2 className="text-2xl font-semibold text-[#0E1B28] dark:text-[#D7E4F1] mt-2">
             {currentCase.referenceId}
           </h2>
-          <p className="text-sm text-[#82898F] mt-1">
-            Subject: {currentCase.subjectId}
-          </p>
         </div>
         <div
           className={`${statusStyles[currentCase.status]} capitalize py-2 px-4 w-fit rounded-2xl text-sm`}
@@ -141,7 +138,7 @@ const ReportDetail = () => {
         </Card>
       )}
 
-      {currentCase.status === 'COMPLETED' && report && (
+      {currentCase.status === 'REPORT_READY' && report && (
         <Card className="bg-white dark:bg-[#0D0D0D]">
           <CardContent className="px-6 py-6 flex flex-col gap-4">
             <div>

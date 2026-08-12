@@ -107,7 +107,9 @@ const Settings = () => {
           )}
           {activeTab === 'team' && <TeamTab user={user} />}
           {activeTab === 'permissions' && <PermissionsTab user={user} />}
-          {activeTab === 'controls' && <ControlsTab user={user} />}
+          {activeTab === 'controls' && (
+            <ControlsTab user={user} onSaved={refreshUser} />
+          )}
           {activeTab === 'preferences' && <PreferencesTab />}
         </>
       )}

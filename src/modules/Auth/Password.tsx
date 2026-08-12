@@ -63,7 +63,7 @@ export default function Password({ title }: PasswordProps) {
         return
       }
 
-      const email = signupData.email
+      const email = signupData.email.trim().toLowerCase()
 
       await authService.createPassword({
         new_password: data.password,

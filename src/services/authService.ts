@@ -77,6 +77,25 @@ export interface UpdateOrganisationRequest {
   industry?: string
 }
 
+export interface OrganisationControls {
+  webhookUrl?: string | null
+  webhookSecret?: string | null
+  brandName?: string | null
+  logoUrl?: string | null
+}
+
+export interface UpdateOrganisationControlsRequest {
+  webhookUrl?: string
+  brandName?: string
+  logoUrl?: string
+}
+
+export interface WebhookTestResponse {
+  success: boolean
+  statusCode?: number | null
+  detail: string
+}
+
 export interface TeamMember {
   id: number
   email: string
@@ -149,6 +168,37 @@ export const authService = {
     const response = await apiClient.patch<AuthenticatedUser>(
       API_ENDPOINTS.AUTH.ORGANISATION,
       data
+    )
+    return response.data
+  },
+
+  async getOrganisationControls(): Promise<OrganisationControls> {
+    const response = await apiClient.get<OrganisationControls>(
+      API_ENDPOINTS.AUTH.ORGANISATION_CONTROLS
+    )
+    return response.data
+  },
+
+  async updateOrganisationControls(
+    data: UpdateOrganisationControlsRequest
+  ): Promise<OrganisationControls> {
+    const response = await apiClient.patch<OrganisationControls>(
+      API_ENDPOINTS.AUTH.ORGANISATION_CONTROLS,
+      data
+    )
+    return response.data
+  },
+
+  async rotateWebhookSecret(): Promise<OrganisationControls> {
+    const response = await apiClient.post<OrganisationControls>(
+      API_ENDPOINTS.AUTH.ORGANISATION_WEBHOOK_SECRET_ROTATE
+    )
+    return response.data
+  },
+
+  async sendTestWebhook(): Promise<WebhookTestResponse> {
+    const response = await apiClient.post<WebhookTestResponse>(
+      API_ENDPOINTS.AUTH.ORGANISATION_WEBHOOK_TEST
     )
     return response.data
   },

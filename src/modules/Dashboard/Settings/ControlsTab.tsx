@@ -18,6 +18,7 @@ import Button from '@/components/buttons/Button'
 
 type Props = {
   user: AuthenticatedUser
+  onSaved: () => Promise<void>
 }
 
 type ControlsSection = 'activity' | 'logs'
@@ -42,10 +43,7 @@ const schema = z.object({
 
 type FormType = z.infer<typeof schema>
 
-const storageKey = (orgId?: string) =>
-  `scrub_controls_${orgId || 'default'}`
-
-const ControlsTab = ({ user }: Props) => {
+const ControlsTab = ({ user, onSaved }: Props) => {
   const [searchParams, setSearchParams] = useSearchParams()
   const isAdmin = !!user.isOrgAdmin
   const sectionParam = searchParams.get('section')
@@ -56,6 +54,10 @@ const ControlsTab = ({ user }: Props) => {
   const [activity, setActivity] = useState<OrganisationEvent[]>([])
   const [logs, setLogs] = useState<OrganisationEvent[]>([])
   const [loadingEvents, setLoadingEvents] = useState(true)
+  const [webhookSecret, setWebhookSecret] = useState<string | null>(null)
+  const [showSecret, setShowSecret] = useState(false)
+  const [rotatingSecret, setRotatingSecret] = useState(false)
+  const [testingWebhook, setTestingWebhook] = useState(false)
 
   const setSection = (next: ControlsSection) => {
     const params = new URLSearchParams(searchParams)
@@ -79,20 +81,31 @@ const ControlsTab = ({ user }: Props) => {
   })
 
   useEffect(() => {
-    try {
-      const raw = localStorage.getItem(storageKey(String(user.organisationId)))
-      if (raw) {
-        reset(JSON.parse(raw))
-        return
+    let cancelled = false
+    const load = async () => {
+      try {
+        const controls = await authService.getOrganisationControls()
+        if (cancelled) return
+        reset({
+          webhookUrl: controls.webhookUrl || '',
+          brandName: controls.brandName || user.company || '',
+          logoUrl: controls.logoUrl || '',
+        })
+        setWebhookSecret(controls.webhookSecret || null)
+      } catch {
+        if (!cancelled) {
+          reset({
+            webhookUrl: '',
+            brandName: user.company || '',
+            logoUrl: '',
+          })
+        }
       }
-    } catch {
-      /* ignore */
     }
-    reset({
-      webhookUrl: '',
-      brandName: user.company || '',
-      logoUrl: '',
-    })
+    load()
+    return () => {
+      cancelled = true
+    }
   }, [user, reset])
 
   useEffect(() => {
@@ -122,11 +135,66 @@ const ControlsTab = ({ user }: Props) => {
 
   const onSubmit = async (data: FormType) => {
     if (!isAdmin) return
-    localStorage.setItem(
-      storageKey(String(user.organisationId)),
-      JSON.stringify(data)
-    )
-    toast.success('Controls saved')
+    try {
+      const controls = await authService.updateOrganisationControls({
+        webhookUrl: data.webhookUrl || '',
+        brandName: data.brandName || '',
+        logoUrl: data.logoUrl || '',
+      })
+      setWebhookSecret(controls.webhookSecret || null)
+      await onSaved()
+      toast.success('Controls saved')
+    } catch (error) {
+      toast.error(
+        (error as { response?: { data?: { detail?: string } } })?.response?.data
+          ?.detail || 'Failed to save controls'
+      )
+    }
+  }
+
+  const onRotateSecret = async () => {
+    if (!isAdmin) return
+    setRotatingSecret(true)
+    try {
+      const controls = await authService.rotateWebhookSecret()
+      setWebhookSecret(controls.webhookSecret || null)
+      setShowSecret(true)
+      toast.success('Webhook signing secret rotated')
+    } catch (error) {
+      toast.error(
+        (error as { response?: { data?: { detail?: string } } })?.response?.data
+          ?.detail || 'Failed to rotate secret'
+      )
+    } finally {
+      setRotatingSecret(false)
+    }
+  }
+
+  const onSendTestWebhook = async () => {
+    if (!isAdmin) return
+    setTestingWebhook(true)
+    try {
+      const result = await authService.sendTestWebhook()
+      if (result.success) toast.success(result.detail)
+      else toast.error(result.detail)
+    } catch (error) {
+      toast.error(
+        (error as { response?: { data?: { detail?: string } } })?.response?.data
+          ?.detail || 'Failed to send test webhook'
+      )
+    } finally {
+      setTestingWebhook(false)
+    }
+  }
+
+  const onCopySecret = async () => {
+    if (!webhookSecret) return
+    try {
+      await navigator.clipboard.writeText(webhookSecret)
+      toast.success('Signing secret copied')
+    } catch {
+      toast.error('Could not copy secret')
+    }
   }
 
   return (
@@ -151,7 +219,8 @@ const ControlsTab = ({ user }: Props) => {
                 Webhook URL
               </h4>
               <p className="text-xs text-[#82898F] mb-2">
-                Receive event payloads for scans, reports, and team changes.
+                ScrubDetect POSTs a signed payload here when a financial report
+                completes or fails. Respond with 2xx within 15 seconds.
               </p>
               <fieldset disabled={!isAdmin} className="contents">
                 <Input
@@ -163,6 +232,57 @@ const ControlsTab = ({ user }: Props) => {
                   error={errors.webhookUrl?.message}
                 />
               </fieldset>
+
+              {isAdmin && webhookSecret && (
+                <div className="mt-3 rounded-lg border border-[#E8E8E9] dark:border-[#2A2A2A] bg-[#FAFBFC] dark:bg-[#161616] p-3">
+                  <p className="text-xs font-medium text-[#0E1B28] dark:text-[#D7E4F1] mb-1">
+                    Signing secret
+                  </p>
+                  <p className="text-xs text-[#82898F] mb-2">
+                    Verify the <code className="text-[11px]">X-Signature</code>{' '}
+                    header with HMAC-SHA256 of the raw body.
+                  </p>
+                  <code className="block break-all rounded bg-[#0D0D0D] px-3 py-2 text-xs font-mono text-[#FAD645]">
+                    {showSecret
+                      ? webhookSecret
+                      : '•'.repeat(Math.min(webhookSecret.length, 40))}
+                  </code>
+                  <div className="mt-2 flex flex-wrap gap-2">
+                    <Button
+                      type="button"
+                      className="bg-white dark:bg-[#1C1C1C] border border-[#E0E0E0] dark:border-[#333333] text-[#0E1B28] dark:text-[#D7E4F1] [&&]:w-fit [&&]:h-8 [&&]:px-3 [&&]:text-xs"
+                      onClick={() => setShowSecret((v) => !v)}
+                    >
+                      {showSecret ? 'Hide' : 'Reveal'}
+                    </Button>
+                    <Button
+                      type="button"
+                      className="bg-white dark:bg-[#1C1C1C] border border-[#E0E0E0] dark:border-[#333333] text-[#0E1B28] dark:text-[#D7E4F1] [&&]:w-fit [&&]:h-8 [&&]:px-3 [&&]:text-xs"
+                      onClick={onCopySecret}
+                    >
+                      Copy
+                    </Button>
+                    <Button
+                      type="button"
+                      className="bg-white dark:bg-[#1C1C1C] border border-[#E0E0E0] dark:border-[#333333] text-[#0E1B28] dark:text-[#D7E4F1] [&&]:w-fit [&&]:h-8 [&&]:px-3 [&&]:text-xs"
+                      onClick={onRotateSecret}
+                      isLoading={rotatingSecret}
+                      disabled={rotatingSecret}
+                    >
+                      Rotate
+                    </Button>
+                    <Button
+                      type="button"
+                      className="bg-[#FAD645] dark:text-black hover:bg-[#FAD645]/90 [&&]:w-fit [&&]:h-8 [&&]:px-3 [&&]:text-xs"
+                      onClick={onSendTestWebhook}
+                      isLoading={testingWebhook}
+                      disabled={testingWebhook}
+                    >
+                      Send test
+                    </Button>
+                  </div>
+                </div>
+              )}
             </div>
 
             <div>
@@ -170,8 +290,8 @@ const ControlsTab = ({ user }: Props) => {
                 Branding
               </h4>
               <p className="text-xs text-[#82898F] mb-2">
-                Customise how your organisation appears in emails and consent
-                flows.
+                Customise how your organisation appears in consent flows. Leave
+                blank to use ScrubDetect.
               </p>
               <fieldset disabled={!isAdmin} className="flex flex-col gap-2">
                 <Input

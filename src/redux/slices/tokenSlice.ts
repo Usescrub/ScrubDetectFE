@@ -6,6 +6,7 @@ import {
 import type { Token } from '@/services/tokenService'
 import { tokenService } from '@/services/tokenService'
 import type { ToolboxItem } from '@/constants/toolbox'
+import type { ApiEnvironment } from '@/redux/slices/environmentSlice'
 
 interface InitialState {
   tokens: Token[]
@@ -36,7 +37,11 @@ export const fetchTokens = createAsyncThunk(
 export const createToken = createAsyncThunk(
   'token/createToken',
   async (
-    payload: { name: string; scopes: ToolboxItem[] },
+    payload: {
+      name: string
+      scopes: ToolboxItem[]
+      environment: ApiEnvironment
+    },
     { rejectWithValue }
   ) => {
     try {

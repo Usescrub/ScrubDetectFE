@@ -19,6 +19,14 @@ apiClient.interceptors.request.use(
       config.headers.Authorization = `Bearer ${token}`
     }
 
+    const environment = localStorage.getItem('scrub_environment')
+    if (
+      (environment === 'live' || environment === 'sandbox') &&
+      config.headers
+    ) {
+      config.headers['X-Scrub-Environment'] = environment
+    }
+
     if (
       config.data &&
       typeof config.data === 'object' &&

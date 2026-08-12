@@ -44,6 +44,7 @@ const OrganisationsManagement = () => {
     country: '',
     planId: '',
     toolbox: [] as ToolboxItem[],
+    liveEnabled: false,
   })
 
   const load = async (nextOffset = offset, nextSearch = query) => {
@@ -95,6 +96,7 @@ const OrganisationsManagement = () => {
           ? String(org.subscription.planId)
           : '',
       toolbox: [...(org.toolbox || [])],
+      liveEnabled: !!org.liveEnabled,
     })
   }
 
@@ -118,6 +120,7 @@ const OrganisationsManagement = () => {
         industry: form.industry || undefined,
         country: form.country || undefined,
         toolbox: form.toolbox,
+        liveEnabled: form.liveEnabled,
         planId: form.planId ? Number(form.planId) : undefined,
       })
       setOrgs((prev) => prev.map((o) => (o.id === editing.id ? updated : o)))
@@ -201,6 +204,7 @@ const OrganisationsManagement = () => {
                     <p className="text-xs text-[#82898F] mt-1">
                       {`${org.usersCount} users`}
                       {org.planSlug ? ` · Plan: ${org.planSlug}` : ''}
+                      {org.liveEnabled ? ' · Live enabled' : ' · Sandbox only'}
                       {org.toolbox?.length
                         ? ` · ${org.toolbox.map((t) => TOOLBOX_LABELS[t] || t).join(', ')}`
                         : ''}
@@ -301,6 +305,29 @@ const OrganisationsManagement = () => {
                 ))}
               </select>
             </label>
+            <div>
+              <p className="text-sm text-[#82898F] mb-2">Access</p>
+              <label className="flex items-center gap-2 text-sm cursor-pointer">
+                <Checkbox
+                  checked={form.liveEnabled}
+                  onCheckedChange={(checked) =>
+                    setForm((prev) => ({
+                      ...prev,
+                      liveEnabled: checked === true,
+                    }))
+                  }
+                />
+                <span
+                  className={cn(
+                    form.liveEnabled
+                      ? 'text-[#0E1B28] dark:text-[#D7E4F1]'
+                      : 'text-[#82898F]'
+                  )}
+                >
+                  Allow Live access
+                </span>
+              </label>
+            </div>
             <div>
               <p className="text-sm text-[#82898F] mb-2">Toolbox</p>
               <div className="flex flex-col gap-2">

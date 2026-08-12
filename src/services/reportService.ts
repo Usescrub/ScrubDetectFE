@@ -5,22 +5,23 @@ export type CaseStatus =
   | 'PENDING_CONNECTION'
   | 'CONNECTED'
   | 'PROCESSING'
-  | 'COMPLETED'
+  | 'REPORT_READY'
   | 'FAILED'
   | 'EXPIRED'
 
 export interface CreateReportRequest {
-  subjectId: string
   fullName: string
   contactPhone?: string
   contactEmail?: string
   referenceId: string
+  countryCodes?: string[]
 }
 
 export interface CreateReportResponse {
   caseId: string
   status: string
   message: string
+  linkUrl: string
 }
 
 export interface ReportPayload {
@@ -51,6 +52,18 @@ export interface CaseListResponse {
 export interface LinkTokenResponse {
   linkToken: string
   provider: string
+  brandName?: string | null
+  logoUrl?: string | null
+  displayName?: string | null
+}
+
+export interface ConsentSessionResponse {
+  status: 'valid' | 'expired' | 'used' | 'invalid'
+  displayName: string
+  brandName?: string | null
+  logoUrl?: string | null
+  applicantName?: string | null
+  detail?: string | null
 }
 
 export interface ExchangeTokenRequest {
@@ -93,6 +106,13 @@ export const reportService = {
 }
 
 export const consentService = {
+  getSession: async (consentToken: string) => {
+    const response = await apiClient.get<ConsentSessionResponse>(
+      API_ENDPOINTS.CONSENT.SESSION(consentToken)
+    )
+    return response.data
+  },
+
   createLinkToken: async (consentToken: string) => {
     const response = await apiClient.post<LinkTokenResponse>(
       API_ENDPOINTS.CONSENT.LINK_TOKEN(consentToken)

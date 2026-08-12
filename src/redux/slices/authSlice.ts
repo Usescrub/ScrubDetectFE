@@ -25,6 +25,7 @@ export interface AuthenticatedUser {
   roles?: string[]
   permissions?: string[]
   toolbox?: string[]
+  liveEnabled?: boolean
   organisationId?: string
   isOrgAdmin?: boolean
   isSuperadmin?: boolean

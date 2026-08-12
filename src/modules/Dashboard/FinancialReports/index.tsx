@@ -25,11 +25,15 @@ import Plus from '@/assets/icons/plus.svg?react'
 
 const formSchema = z
   .object({
-    subjectId: z.string().min(1, 'Subject ID is required'),
     fullName: z.string().min(1, 'Full name is required'),
     contactEmail: z.string().email('Invalid email').optional().or(z.literal('')),
     contactPhone: z.string().optional(),
     referenceId: z.string().min(1, 'Reference ID is required'),
+    countryCode: z
+      .string()
+      .min(2, 'Country code is required')
+      .max(2, 'Use a 2-letter country code')
+      .regex(/^[A-Za-z]{2}$/, 'Use a 2-letter country code'),
   })
   .refine((data) => data.contactEmail || data.contactPhone, {
     message: 'Email or phone is required',
@@ -41,7 +45,6 @@ type FormType = z.infer<typeof formSchema>
 type ReportRow = {
   caseId: string
   referenceId: string
-  subjectId: string
   status: CaseStatus
   createdAt: string
 }
@@ -50,7 +53,7 @@ const statusStyles: Record<CaseStatus, string> = {
   PENDING_CONNECTION: 'bg-[#FDF8EF] text-[#DF9300]',
   CONNECTED: 'bg-[#FDF8EF] text-[#DF9300]',
   PROCESSING: 'bg-[#FDF8EF] text-[#DF9300]',
-  COMPLETED: 'bg-[#EBFAF5] text-[#0CB95B]',
+  REPORT_READY: 'bg-[#EBFAF5] text-[#0CB95B]',
   FAILED: 'bg-[#FDEDED] text-[#E31E18]',
   EXPIRED: 'bg-[#FDEDED] text-[#E31E18]',
 }
@@ -59,10 +62,6 @@ const columns: ColumnDef<ReportRow>[] = [
   {
     accessorKey: 'referenceId',
     header: 'REFERENCE',
-  },
-  {
-    accessorKey: 'subjectId',
-    header: 'SUBJECT',
   },
   {
     accessorKey: 'status',
@@ -107,7 +106,6 @@ const FinancialReports = () => {
   const tableData: ReportRow[] = cases.map((c) => ({
     caseId: c.caseId,
     referenceId: c.referenceId,
-    subjectId: c.subjectId,
     status: c.status,
     createdAt: c.createdAt,
   }))
@@ -120,11 +118,11 @@ const FinancialReports = () => {
   } = useForm<FormType>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      subjectId: '',
       fullName: '',
       contactEmail: '',
       contactPhone: '',
       referenceId: '',
+      countryCode: 'US',
     },
   })
 
@@ -136,11 +134,11 @@ const FinancialReports = () => {
     try {
       const result = await dispatch(
         createReport({
-          subjectId: data.subjectId,
           fullName: data.fullName,
           contactEmail: data.contactEmail || undefined,
           contactPhone: data.contactPhone || undefined,
           referenceId: data.referenceId,
+          countryCodes: [data.countryCode.toUpperCase()],
         })
       ).unwrap()
       toast.success('Report request created')
@@ -209,11 +207,11 @@ const FinancialReports = () => {
               classname="w-full"
             />
             <Input
-              name="subjectId"
+              name="countryCode"
               type="text"
-              placeholder="Subject ID"
+              placeholder="Country code (e.g. US, NG, GB)"
               control={control}
-              error={errors.subjectId?.message}
+              error={errors.countryCode?.message}
               classname="w-full"
             />
             <Input

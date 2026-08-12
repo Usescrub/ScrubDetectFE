@@ -1,12 +1,14 @@
 import apiClient from './api'
 import { API_ENDPOINTS } from './config'
 import type { ToolboxItem } from '@/constants/toolbox'
+import type { ApiEnvironment } from '@/redux/slices/environmentSlice'
 
 export interface Token {
   id: string
   name: string
   key: string
   scopes: ToolboxItem[]
+  environment: ApiEnvironment
   createdAt: string
   lastUsedAt?: string
   isEnabled?: boolean
@@ -15,6 +17,7 @@ export interface Token {
 export interface CreateTokenRequest {
   name: string
   scopes: ToolboxItem[]
+  environment: ApiEnvironment
 }
 
 export interface CreateTokenResponse {

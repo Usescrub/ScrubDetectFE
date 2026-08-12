@@ -39,6 +39,7 @@ export interface AdminOrganisation {
   industry?: string
   country?: string
   toolbox: ToolboxItem[]
+  liveEnabled?: boolean
   usersCount: number
   planSlug?: string
   createdAt: string
@@ -108,6 +109,7 @@ export interface UpdateAdminOrganisationRequest {
   industry?: string
   country?: string
   toolbox?: ToolboxItem[]
+  liveEnabled?: boolean
   planId?: number
 }
 

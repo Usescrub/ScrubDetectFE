@@ -4,6 +4,7 @@ import authReducer from './slices/authSlice'
 import scanReducer from './slices/scanSlice'
 import tokenReducer from './slices/tokenSlice'
 import reportReducer from './slices/reportSlice'
+import environmentReducer from './slices/environmentSlice'
 
 export const store = configureStore({
   reducer: {
@@ -11,6 +12,7 @@ export const store = configureStore({
     scan: scanReducer,
     token: tokenReducer,
     report: reportReducer,
+    environment: environmentReducer,
   },
 })
 
